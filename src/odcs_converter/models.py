@@ -5,6 +5,7 @@ from typing import Any, List, Optional, Union
 from enum import Enum
 
 from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
+from typing import Dict
 
 
 class ApiVersionEnum(str, Enum):
@@ -77,12 +78,48 @@ class QualityDimensionEnum(str, Enum):
     """Data quality dimensions."""
 
     ACCURACY = "accuracy"
+    AC = "ac"  # synonym
     COMPLETENESS = "completeness"
+    CP = "cp"  # synonym
     CONFORMITY = "conformity"
+    CF = "cf"  # synonym
     CONSISTENCY = "consistency"
+    CS = "cs"  # synonym
     COVERAGE = "coverage"
+    CV = "cv"  # synonym
     TIMELINESS = "timeliness"
+    TM = "tm"  # synonym
     UNIQUENESS = "uniqueness"
+    UQ = "uq"  # synonym
+
+
+class LogicalTypeOptions(BaseModel):
+    """Logical type options for schema properties."""
+
+    # String options
+    format: Optional[str] = Field(None, description="String format (email, uuid, etc.)")
+    minLength: Optional[int] = Field(None, description="Minimum string length")
+    maxLength: Optional[int] = Field(None, description="Maximum string length")
+    pattern: Optional[str] = Field(None, description="Regular expression pattern")
+
+    # Number/Integer options
+    minimum: Optional[Union[int, float]] = Field(None, description="Minimum value")
+    maximum: Optional[Union[int, float]] = Field(None, description="Maximum value")
+    exclusiveMinimum: Optional[bool] = Field(None, description="Exclusive minimum flag")
+    exclusiveMaximum: Optional[bool] = Field(None, description="Exclusive maximum flag")
+    multipleOf: Optional[Union[int, float]] = Field(
+        None, description="Multiple of value"
+    )
+
+    # Array options
+    minItems: Optional[int] = Field(None, description="Minimum array items")
+    maxItems: Optional[int] = Field(None, description="Maximum array items")
+    uniqueItems: Optional[bool] = Field(None, description="Unique items in array")
+
+    # Object options
+    minProperties: Optional[int] = Field(None, description="Minimum object properties")
+    maxProperties: Optional[int] = Field(None, description="Maximum object properties")
+    required: Optional[List[str]] = Field(None, description="Required property names")
 
 
 class CustomProperty(BaseModel):
@@ -156,6 +193,7 @@ class Pricing(BaseModel):
 class DataQuality(BaseModel):
     """Data quality rule definition."""
 
+    # Basic fields
     name: Optional[str] = Field(None, description="Name of the quality check")
     description: Optional[str] = Field(None, description="Quality check description")
     dimension: Optional[QualityDimensionEnum] = Field(
@@ -164,22 +202,73 @@ class DataQuality(BaseModel):
     type: Optional[str] = Field("library", description="Type of quality check")
     severity: Optional[str] = Field(None, description="Severity level")
     businessImpact: Optional[str] = Field(None, description="Business impact")
+
+    # Library rule fields
+    rule: Optional[str] = Field(None, description="Library rule name")
+    unit: Optional[str] = Field(None, description="Unit (rows, percent)")
+    validValues: Optional[List[Any]] = Field(None, description="Valid values list")
+
+    # SQL rule fields
+    query: Optional[str] = Field(None, description="SQL query for validation")
+
+    # Custom rule fields
+    engine: Optional[str] = Field(None, description="Custom engine name")
+    implementation: Optional[str] = Field(None, description="Custom implementation")
+
+    # Comparison operators
+    mustBe: Optional[Union[int, float]] = Field(None, description="Must equal value")
+    mustNotBe: Optional[Union[int, float]] = Field(
+        None, description="Must not equal value"
+    )
+    mustBeGreaterThan: Optional[Union[int, float]] = Field(
+        None, description="Must be greater than"
+    )
+    mustBeGreaterOrEqualTo: Optional[Union[int, float]] = Field(
+        None, description="Must be >= value"
+    )
+    mustBeLessThan: Optional[Union[int, float]] = Field(
+        None, description="Must be less than"
+    )
+    mustBeLessOrEqualTo: Optional[Union[int, float]] = Field(
+        None, description="Must be <= value"
+    )
+    mustBeBetween: Optional[List[Union[int, float]]] = Field(
+        None, description="Must be between values"
+    )
+    mustNotBeBetween: Optional[List[Union[int, float]]] = Field(
+        None, description="Must not be between values"
+    )
+
+    # Additional fields
+    method: Optional[str] = Field(None, description="Method (reconciliation, etc.)")
     schedule: Optional[str] = Field(None, description="Execution schedule")
     scheduler: Optional[str] = Field(None, description="Scheduler type")
     tags: Optional[List[str]] = Field(None, description="Quality tags")
+    customProperties: Optional[List["CustomProperty"]] = Field(
+        None, description="Custom properties"
+    )
+    authoritativeDefinitions: Optional[List["AuthoritativeDefinition"]] = Field(
+        None, description="Authoritative definitions"
+    )
 
 
 class SchemaProperty(BaseModel):
     """Schema property definition."""
 
+    # Basic fields
     name: str = Field(..., description="Property name")
     logicalType: Optional[LogicalTypeEnum] = Field(
         None, description="Logical data type"
+    )
+    logicalTypeOptions: Optional[LogicalTypeOptions] = Field(
+        None, description="Logical type options"
     )
     physicalType: Optional[str] = Field(None, description="Physical data type")
     physicalName: Optional[str] = Field(None, description="Physical name")
     description: Optional[str] = Field(None, description="Property description")
     businessName: Optional[str] = Field(None, description="Business name")
+
+    # Constraints
     required: Optional[bool] = Field(False, description="Whether required")
     unique: Optional[bool] = Field(False, description="Whether unique")
     primaryKey: Optional[bool] = Field(False, description="Whether primary key")
@@ -188,14 +277,36 @@ class SchemaProperty(BaseModel):
     partitionKeyPosition: Optional[int] = Field(
         -1, description="Partition key position"
     )
+
+    # Security and classification
     classification: Optional[str] = Field(None, description="Data classification")
+    encryptedName: Optional[str] = Field(None, description="Encrypted field name")
     criticalDataElement: Optional[bool] = Field(False, description="Whether CDE")
+
+    # Transform fields
+    transformSourceObjects: Optional[List[str]] = Field(
+        None, description="Transform source objects"
+    )
+    transformLogic: Optional[str] = Field(None, description="Transform logic")
+    transformDescription: Optional[str] = Field(
+        None, description="Transform description"
+    )
+
+    # Array items (for array types)
+    items: Optional[Union["SchemaProperty", Dict[str, Any]]] = Field(
+        None, description="Array items definition"
+    )
+
+    # Metadata
     examples: Optional[List[Any]] = Field(None, description="Example values")
     tags: Optional[List[str]] = Field(None, description="Property tags")
-    customProperties: Optional[List[CustomProperty]] = Field(
+    customProperties: Optional[List["CustomProperty"]] = Field(
         None, description="Custom properties"
     )
     quality: Optional[List[DataQuality]] = Field(None, description="Quality checks")
+    authoritativeDefinitions: Optional[List["AuthoritativeDefinition"]] = Field(
+        None, description="Authoritative definitions"
+    )
 
     @model_validator(mode="after")
     def validate_primary_key_position(self):
@@ -223,10 +334,13 @@ class SchemaObject(BaseModel):
         None, description="Object properties"
     )
     tags: Optional[List[str]] = Field(None, description="Object tags")
-    customProperties: Optional[List[CustomProperty]] = Field(
+    customProperties: Optional[List["CustomProperty"]] = Field(
         None, description="Custom properties"
     )
     quality: Optional[List[DataQuality]] = Field(None, description="Quality checks")
+    authoritativeDefinitions: Optional[List["AuthoritativeDefinition"]] = Field(
+        None, description="Authoritative definitions"
+    )
 
 
 class Server(BaseModel):
@@ -272,6 +386,9 @@ class ServiceLevelAgreementProperty(BaseModel):
     property: str = Field(..., description="SLA property name")
     value: Union[str, int, float, bool, None] = Field(
         ..., description="Agreement value"
+    )
+    valueExt: Optional[Union[str, int, float, bool]] = Field(
+        None, description="Extended agreement value"
     )
     unit: Optional[str] = Field(None, description="Value unit")
     element: Optional[str] = Field(None, description="Element to check")
@@ -329,3 +446,9 @@ class ODCSDataContract(BaseModel):
         use_enum_values = True
         validate_assignment = True
         extra = "forbid"
+
+
+# Update forward references for circular dependencies
+DataQuality.model_rebuild()
+SchemaProperty.model_rebuild()
+SchemaObject.model_rebuild()
