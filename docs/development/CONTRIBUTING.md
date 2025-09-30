@@ -1,6 +1,6 @@
-# Contributing to ODCS Excel Generator
+# Contributing to ODCS Converter
 
-Thank you for your interest in contributing to ODCS Excel Generator! We welcome contributions from the community and are pleased to have you join us.
+Thank you for your interest in contributing to ODCS Converter! We welcome contributions from the community and are pleased to have you join us.
 
 ## 🚀 Quick Start
 
@@ -318,4 +318,4 @@ By contributing, you agree that your contributions will be licensed under the sa
 
 ---
 
-Thank you for contributing to ODCS Excel Generator! 🎉
+Thank you for contributing to ODCS Converter! 🎉

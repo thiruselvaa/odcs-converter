@@ -1,4 +1,4 @@
-"""Main ODCS Excel Generator implementation."""
+"""Main ODCS Converter implementation."""
 
 import json
 import logging

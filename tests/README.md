@@ -1,6 +1,6 @@
 # Test Organization and Structure
 
-This document describes the comprehensive test organization structure for the ODCS Excel Generator project, designed for maintainability, clarity, and ease of development.
+This document describes the comprehensive test organization structure for the ODCS Converter project, designed for maintainability, clarity, and ease of development.
 
 ## 📁 Directory Structure
 

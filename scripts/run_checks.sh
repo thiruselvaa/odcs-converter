@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Run all code quality checks for ODCS Excel Generator
+# Run all code quality checks for ODCS Converter
 # This script runs linting, formatting, type checking, and tests
 #
 # Usage: ./scripts/run_checks.sh [--fix]

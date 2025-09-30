@@ -1,6 +1,6 @@
 # Scripts Directory
 
-This directory contains utility scripts for development, testing, and maintenance of the ODCS Excel Generator project.
+This directory contains utility scripts for development, testing, and maintenance of the ODCS Converter project.
 
 ## 📋 Available Scripts
 
@@ -227,7 +227,7 @@ chmod +x scripts/script_name.sh
 
 ```bash
 # Solution: Run from project root
-cd /path/to/odcs-excel-generator
+cd /path/to/odcs-converter
 ./scripts/script_name.sh
 ```
 
@@ -295,4 +295,4 @@ If you encounter issues with scripts:
 
 **Last Updated**: 2025-01-26
 **Maintainer**: Thiruselva
-**Project**: ODCS Excel Generator
+**Project**: ODCS Converter

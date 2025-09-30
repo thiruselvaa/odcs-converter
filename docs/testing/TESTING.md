@@ -1,6 +1,6 @@
-# Testing Guide - ODCS Excel Generator
+# Testing Guide - ODCS Converter
 
-This comprehensive guide covers all aspects of testing in the ODCS Excel Generator project.
+This comprehensive guide covers all aspects of testing in the ODCS Converter project.
 
 ## 📋 Table of Contents
 
@@ -16,7 +16,7 @@ This comprehensive guide covers all aspects of testing in the ODCS Excel Generat
 
 ## Overview
 
-The ODCS Excel Generator uses **pytest** as its testing framework. The test suite is organized into three main categories:
+The ODCS Converter uses **pytest** as its testing framework. The test suite is organized into three main categories:
 
 - **Unit Tests** - Fast, isolated tests for individual components
 - **Integration Tests** - Tests for component interactions and workflows

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script to initialize the test directory structure for ODCS Excel Generator.
+Setup script to initialize the test directory structure for ODCS Converter.
 
 This script creates the complete test directory structure with proper organization
 for unit tests, integration tests, and end-to-end tests, along with all necessary
@@ -339,13 +339,13 @@ def verify_setup() -> bool:
 
 def main() -> None:
     """Main setup function."""
-    print("🚀 ODCS Excel Generator Test Setup")
+    print("🚀 ODCS Converter Test Setup")
     print("=" * 50)
 
     # Check if we're in the right directory
     if not Path("src").exists() or not Path("pyproject.toml").exists():
         print("❌ Error: This script should be run from the project root directory.")
-        print("   Make sure you're in the odcs-excel-generator directory.")
+        print("   Make sure you're in the odcs-converter directory.")
         sys.exit(1)
 
     try:

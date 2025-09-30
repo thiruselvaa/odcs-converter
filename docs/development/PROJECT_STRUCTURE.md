@@ -1,11 +1,11 @@
-# Project Structure - ODCS Excel Generator
+# Project Structure - ODCS Converter
 
-This document describes the complete directory structure and organization of the ODCS Excel Generator project.
+This document describes the complete directory structure and organization of the ODCS Converter project.
 
 ## 📁 Directory Tree
 
 ```
-odcs-excel-generator/
+odcs-converter/
 ├── .github/                          # GitHub specific files
 │   └── workflows/                    # CI/CD workflows
 │       ├── test.yml                  # Automated testing

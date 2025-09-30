@@ -1,4 +1,4 @@
-# ODCS Excel Generator - Setup Guide
+# ODCS Converter - Setup Guide
 
 ## Project Overview
 

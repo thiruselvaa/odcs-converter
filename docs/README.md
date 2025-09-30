@@ -1,6 +1,6 @@
-# ODCS Excel Generator - Documentation
+# ODCS Converter - Documentation
 
-Welcome to the ODCS Excel Generator documentation! This directory contains comprehensive guides and references for developers, contributors, and users.
+Welcome to the ODCS Converter documentation! This directory contains comprehensive guides and references for developers, contributors, and users.
 
 ## 📚 Documentation Structure
 
@@ -27,9 +27,9 @@ Guides for deploying and using the project.
 - **[Configuration Guide](deployment/CONFIGURATION.md)** - Configuration options
 
 ### User Documentation
-Guides for end users of the ODCS Excel Generator.
+Guides for end users of the ODCS Converter.
 
-- **[User Guide](user/USER_GUIDE.md)** - How to use the ODCS Excel Generator
+- **[User Guide](user/USER_GUIDE.md)** - How to use the ODCS Converter
 - **[CLI Reference](user/CLI.md)** - Command-line interface documentation
 - **[Examples](user/EXAMPLES.md)** - Usage examples and tutorials
 
@@ -96,7 +96,7 @@ For questions about documentation or to suggest improvements, please open an iss
 
 ---
 
-**Project**: ODCS Excel Generator
+**Project**: ODCS Converter
 **Version**: 0.2.0
 **License**: MIT
 **Author**: Thiruselva
