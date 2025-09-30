@@ -37,6 +37,7 @@ dependencies = [
     "typer>=0.9.0",
     "pyyaml>=6.0.0",
     "pandas>=2.0.0",
+    "loguru>=0.7.0",
 ]
 
 [project.optional-dependencies]
@@ -78,6 +79,15 @@ target-version = ["py38"]
 [tool.ruff]
 target-version = "py38"
 line-length = 88
+
+[tool.ruff.lint]
+ignore = []
+select = ["E", "F", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/odcs_converter/__init__.py" = ["E402"]
+"src/odcs_converter/cli.py" = ["E402"]
+"tests/**/*.py" = ["F841"]
 
 [tool.pytest.ini_options]
 minversion = "7.0"
