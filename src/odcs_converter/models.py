@@ -4,12 +4,13 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from enum import Enum
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 
 
 class ApiVersionEnum(str, Enum):
     """Supported ODCS API versions."""
 
+    V3_1_0 = "v3.1.0"
     V3_0_2 = "v3.0.2"
     V3_0_1 = "v3.0.1"
     V3_0_0 = "v3.0.0"
@@ -196,6 +197,15 @@ class SchemaProperty(BaseModel):
     )
     quality: Optional[List[DataQuality]] = Field(None, description="Quality checks")
 
+    @model_validator(mode="after")
+    def validate_primary_key_position(self):
+        """Validate that primaryKey requires primaryKeyPosition."""
+        if self.primaryKey and (
+            self.primaryKeyPosition is None or self.primaryKeyPosition < 0
+        ):
+            raise ValueError("primaryKeyPosition is required when primaryKey is True")
+        return self
+
 
 class SchemaObject(BaseModel):
     """Schema object definition."""
@@ -304,6 +314,14 @@ class ODCSDataContract(BaseModel):
     contractCreatedTs: Optional[datetime] = Field(
         None, description="Contract creation timestamp"
     )
+
+    @field_validator("id", "version", "status")
+    @classmethod
+    def validate_non_empty_string(cls, v: str) -> str:
+        """Validate that required string fields are not empty or whitespace."""
+        if not v or not v.strip():
+            raise ValueError("Field cannot be empty or whitespace")
+        return v
 
     class Config:
         """Pydantic configuration."""
