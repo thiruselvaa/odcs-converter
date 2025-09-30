@@ -38,6 +38,7 @@ help:
 	@echo "  cli-formats      - Show supported file formats"
 	@echo "  cli-demo         - Run CLI demonstration"
 	@echo "  cli-convert      - Interactive conversion helper"
+	@echo "  cli-templates    - Generate sample Excel templates"
 	@echo ""
 	@echo "📝 Logging and Monitoring:"
 	@echo "  logs-demo        - Run comprehensive logging demonstration"
@@ -127,6 +128,16 @@ cli-demo:
 	@uv run odcs-converter formats
 	@echo ""
 	@echo "✅ CLI demonstration complete!"
+
+.PHONY: cli-templates
+cli-templates:
+	@echo "📋 Generating sample Excel templates..."
+	@mkdir -p demo_templates
+	@uv run odcs-converter generate-template demo_templates/minimal_template.xlsx --type minimal
+	@uv run odcs-converter generate-template demo_templates/required_template.xlsx --type required
+	@uv run odcs-converter generate-template demo_templates/full_template.xlsx --type full
+	@echo "✅ Templates generated in demo_templates/"
+	@ls -lh demo_templates/
 
 .PHONY: cli-convert
 cli-convert:
