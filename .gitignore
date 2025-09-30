@@ -132,6 +132,9 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
+# Ruff cache
+.ruff_cache/
+
 # mkdocs documentation
 /site
 
@@ -169,3 +172,12 @@ test_output.xlsx
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Log directories
+logs/
+demo_logs/
+test_logs/
+*.log
+
+# Accidental pip installation logs
+=*
