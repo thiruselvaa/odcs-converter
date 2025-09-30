@@ -1,11 +1,14 @@
 """YAML conversion utilities for ODCS data."""
 
-import logging
 from pathlib import Path
 from typing import Any, Dict, Union
 import yaml
 
-logger = logging.getLogger(__name__)
+from .logging_config import get_logger
+from .logging_utils import PerformanceTracker
+
+logger = get_logger(__name__)
+performance_tracker = PerformanceTracker()
 
 
 class YAMLConverter:

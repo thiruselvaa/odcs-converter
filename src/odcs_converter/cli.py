@@ -1,17 +1,21 @@
 """Command-line interface for ODCS Converter - Bidirectional conversion between ODCS and Excel."""
 
+# Configure warnings early
+from .warnings_config import configure_warnings
+
+configure_warnings()
+
 import json
-import logging
+import os
 import sys
 import time
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from urllib.parse import urlparse
 from enum import Enum
 
 import typer
 from rich.console import Console
-from rich.logging import RichHandler
 from rich.progress import (
     Progress,
     SpinnerColumn,
@@ -19,34 +23,34 @@ from rich.progress import (
     BarColumn,
     TaskProgressColumn,
     TimeElapsedColumn,
-    MofNCompleteColumn,
 )
 from rich.table import Table
 from rich.panel import Panel
-from rich.text import Text
 from rich.markdown import Markdown
-from rich.prompt import Confirm
-from rich.tree import Tree
 from rich import box
 
 from .generator import ODCSToExcelConverter
 from .excel_parser import ExcelToODCSParser
 from .yaml_converter import YAMLConverter
+from .logging_config import (
+    setup_logging,
+    get_logger,
+    LogContext,
+    log_operation_start,
+    log_operation_end,
+)
+from .logging_utils import PerformanceTracker
 from . import __version__
 
 
 # Configure rich console with enhanced features
 console = Console(stderr=True, force_terminal=True)
 
-# Configure logging with rich handler
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    datefmt="[%X]",
-    handlers=[RichHandler(console=console, rich_tracebacks=True, markup=True)],
-)
+# Initialize logging (will be properly configured when CLI commands are run)
+logger = get_logger(__name__)
 
-logger = logging.getLogger(__name__)
+# Initialize performance tracker
+performance_tracker = PerformanceTracker()
 
 # Create the main Typer app
 app = typer.Typer(
@@ -65,14 +69,31 @@ class OutputFormat(str, Enum):
     excel = "excel"
 
 
-def _configure_logging(verbose: bool = False, quiet: bool = False) -> None:
-    """Configure logging level based on verbosity settings."""
+def _configure_logging(
+    verbose: bool = False, quiet: bool = False, environment: str = None
+) -> None:
+    """Configure comprehensive logging with loguru."""
+    # Determine log level based on verbosity
     if quiet:
-        logging.getLogger().setLevel(logging.ERROR)
+        level_override = "ERROR"
     elif verbose:
-        logging.getLogger().setLevel(logging.DEBUG)
+        level_override = "DEBUG"
     else:
-        logging.getLogger().setLevel(logging.INFO)
+        level_override = None
+
+    # Get environment from CLI option or environment variable
+    env = environment or os.getenv("ODCS_ENV", "local")
+
+    # Override log level if specified
+    if level_override:
+        os.environ["ODCS_LOG_LEVEL"] = level_override
+
+    # Setup logging with environment-specific configuration
+    setup_logging(environment=env)
+
+    # Update global logger
+    global logger
+    logger = get_logger(__name__)
 
 
 def _show_banner() -> None:
@@ -165,6 +186,7 @@ def _show_supported_formats() -> None:
 
 
 @app.command()
+@performance_tracker.track_performance("cli.convert")
 def convert(
     input_source: str = typer.Argument(..., help="📁 Input file path or URL"),
     output_file: str = typer.Argument(..., help="📄 Output file path"),
@@ -203,6 +225,12 @@ def convert(
         "--dry-run",
         help="🧪 Show what would be done without actually converting",
     ),
+    environment: Optional[str] = typer.Option(
+        None,
+        "--env",
+        "--environment",
+        help="🌍 Logging environment (local, dev, test, stage, prod)",
+    ),
 ) -> None:
     """🔄 Bidirectional converter between ODCS and Excel with 100% v3.0.2 coverage.
 
@@ -229,7 +257,15 @@ def convert(
     • Element-level authoritative definitions
     • Rich progress indicators and error reporting
     """
-    _configure_logging(verbose, quiet)
+    _configure_logging(verbose, quiet, environment)
+
+    # Start operation tracking
+    operation_id = log_operation_start(
+        "convert",
+        input_source=input_source,
+        output_file=output_file,
+        format=format.value if format else "auto",
+    )
 
     if show_formats:
         _show_supported_formats()
@@ -245,38 +281,92 @@ def convert(
     start_time = time.time()
 
     try:
-        # Determine conversion direction
-        input_path = Path(input_source)
-        output_path = Path(output_file)
+        with LogContext(operation_id, operation="convert"):
+            # Determine conversion direction
+            input_path = Path(input_source)
+            output_path = Path(output_file)
 
-        if _validate_url(input_source) or input_path.suffix.lower() in [
-            ".json",
-            ".yaml",
-            ".yml",
-        ]:
-            # ODCS to Excel conversion
-            _odcs_to_excel(input_source, str(output_path), config, verbose, quiet)
-            conversion_type = "ODCS → Excel"
-        elif input_path.suffix.lower() in [".xlsx", ".xls"]:
-            # Excel to ODCS conversion
-            _excel_to_odcs(
-                str(input_path), str(output_path), format, validate, verbose, quiet
+            logger.info(
+                "Starting conversion",
+                input_source=input_source,
+                output_file=output_file,
+                correlation_id=operation_id,
             )
-            conversion_type = "Excel → ODCS"
-        else:
-            console.print(
-                f"[red]❌ Error: Unsupported input file type: {input_source}[/red]"
+
+            if _validate_url(input_source) or input_path.suffix.lower() in [
+                ".json",
+                ".yaml",
+                ".yml",
+            ]:
+                # ODCS to Excel conversion
+                logger.info(
+                    "Detected ODCS → Excel conversion",
+                    input_type="ODCS",
+                    output_type="Excel",
+                )
+                _odcs_to_excel(input_source, str(output_path), config, verbose, quiet)
+                conversion_type = "ODCS → Excel"
+            elif input_path.suffix.lower() in [".xlsx", ".xls"]:
+                # Excel to ODCS conversion
+                logger.info(
+                    "Detected Excel → ODCS conversion",
+                    input_type="Excel",
+                    output_type="ODCS",
+                )
+                _excel_to_odcs(
+                    str(input_path), str(output_path), format, validate, verbose, quiet
+                )
+                conversion_type = "Excel → ODCS"
+            else:
+                error_msg = f"Unsupported input file type: {input_source}"
+                logger.error(
+                    "Conversion failed", error=error_msg, input_source=input_source
+                )
+                console.print(f"[red]❌ Error: {error_msg}[/red]")
+                raise typer.Exit(1)
+
+            duration = time.time() - start_time
+
+            logger.info(
+                "Conversion completed successfully",
+                conversion_type=conversion_type,
+                duration_seconds=round(duration, 2),
+                input_source=input_source,
+                output_file=output_file,
             )
-            raise typer.Exit(1)
 
-        duration = time.time() - start_time
+            if not quiet:
+                _show_conversion_summary(
+                    input_source, output_file, conversion_type, duration
+                )
 
-        if not quiet:
-            _show_conversion_summary(
-                input_source, output_file, conversion_type, duration
+            log_operation_end(
+                "convert",
+                operation_id,
+                success=True,
+                conversion_type=conversion_type,
+                duration_seconds=duration,
             )
 
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error(
+            "Conversion failed",
+            error=str(e),
+            input_source=input_source,
+            output_file=output_file,
+            duration_seconds=round(duration, 2),
+            exception_type=type(e).__name__,
+        )
+
+        log_operation_end(
+            "convert",
+            operation_id,
+            success=False,
+            error=str(e),
+            duration_seconds=duration,
+        )
+
         console.print(f"[red]❌ Conversion failed: {str(e)}[/red]")
         if verbose:
             console.print_exception()
@@ -491,6 +581,7 @@ def _show_parsing_results(odcs_data: Dict[str, Any]) -> None:
 
 
 @app.command("to-excel")
+@performance_tracker.track_performance("cli.odcs_to_excel")
 def odcs_to_excel(
     input_file: Path = typer.Argument(
         ..., help="📁 ODCS input file (JSON/YAML)", exists=True
@@ -503,7 +594,13 @@ def odcs_to_excel(
         False, "--verbose", "-v", help="🔍 Verbose output with detailed progress"
     ),
     quiet: bool = typer.Option(
-        False, "--quiet", "-q", help="🔇 Suppress output except errors"
+        False, "--quiet", "-q", help="🔇 Suppress all output except errors"
+    ),
+    environment: Optional[str] = typer.Option(
+        None,
+        "--env",
+        "--environment",
+        help="🌍 Logging environment (local, dev, test, stage, prod)",
     ),
 ) -> None:
     """📊 Convert ODCS contract to Excel workbook with 15 comprehensive worksheets.
@@ -512,7 +609,14 @@ def odcs_to_excel(
     worksheets for all contract components including datasets, quality rules,
     logical types, and transform documentation.
     """
-    _configure_logging(verbose, quiet)
+    _configure_logging(verbose, quiet, environment)
+
+    # Start operation tracking
+    operation_id = log_operation_start(
+        "odcs_to_excel",
+        input_file=str(input_file),
+        output_file=str(output_file),
+    )
 
     if not quiet:
         _show_banner()
@@ -528,6 +632,7 @@ def odcs_to_excel(
 
 
 @app.command("to-odcs")
+@performance_tracker.track_performance("cli.excel_to_odcs")
 def excel_to_odcs(
     input_file: Path = typer.Argument(..., help="📊 Excel input file", exists=True),
     output_file: Path = typer.Argument(..., help="📄 ODCS output file"),
@@ -544,7 +649,13 @@ def excel_to_odcs(
         False, "--verbose", "-v", help="🔍 Verbose output with parsing details"
     ),
     quiet: bool = typer.Option(
-        False, "--quiet", "-q", help="🔇 Suppress output except errors"
+        False, "--quiet", "-q", help="🔇 Suppress all output except errors"
+    ),
+    environment: Optional[str] = typer.Option(
+        None,
+        "--env",
+        "--environment",
+        help="🌍 Logging environment (local, dev, test, stage, prod)",
     ),
 ) -> None:
     """📄 Convert Excel workbook back to ODCS contract format.
@@ -553,7 +664,15 @@ def excel_to_odcs(
     preserving all contract components and metadata with optional
     schema validation.
     """
-    _configure_logging(verbose, quiet)
+    _configure_logging(verbose, quiet, environment)
+
+    # Start operation tracking
+    operation_id = log_operation_start(
+        "excel_to_odcs",
+        input_file=str(input_file),
+        output_file=str(output_file),
+        format=format.value if format else "auto",
+    )
 
     if not quiet:
         _show_banner()
@@ -582,8 +701,18 @@ def version(
     verbose: bool = typer.Option(
         False, "--verbose", "-v", help="🔍 Show detailed version information"
     ),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="🔇 Suppress all output except errors"
+    ),
+    environment: Optional[str] = typer.Option(
+        None,
+        "--env",
+        "--environment",
+        help="🌍 Logging environment (local, dev, test, stage, prod)",
+    ),
 ) -> None:
     """📋 Show version and system information."""
+    _configure_logging(verbose, quiet, environment)
 
     # Basic version info
     version_panel = Panel.fit(
@@ -629,8 +758,22 @@ def version(
 
 
 @app.command()
-def help() -> None:
+def help(
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="🔍 Show detailed help information"
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="🔇 Suppress all output except errors"
+    ),
+    environment: Optional[str] = typer.Option(
+        None,
+        "--env",
+        "--environment",
+        help="🌍 Logging environment (local, dev, test, stage, prod)",
+    ),
+) -> None:
     """📚 Show comprehensive help information."""
+    _configure_logging(verbose, quiet, environment)
     help_content = """
 # ODCS Converter Help
 
@@ -706,8 +849,22 @@ odcs-converter convert data.xlsx contract.json
 
 
 @app.command("formats")
-def show_formats() -> None:
-    """📋 Show all supported file formats and their descriptions."""
+def show_formats(
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="🔍 Show detailed format information"
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="🔇 Suppress all output except errors"
+    ),
+    environment: Optional[str] = typer.Option(
+        None,
+        "--env",
+        "--environment",
+        help="🌍 Logging environment (local, dev, test, stage, prod)",
+    ),
+) -> None:
+    """📋 Show supported file formats and their descriptions."""
+    _configure_logging(verbose, quiet, environment)
     _show_supported_formats()
 
 

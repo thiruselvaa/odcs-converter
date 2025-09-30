@@ -1,6 +1,5 @@
 """Excel to ODCS parser - Convert Excel files back to ODCS JSON/YAML format."""
 
-import logging
 from pathlib import Path
 from typing import Any, Dict, Union, Optional
 from datetime import datetime
@@ -9,8 +8,11 @@ import pandas as pd
 from openpyxl import load_workbook
 
 from .models import ODCSDataContract
+from .logging_config import get_logger
+from .logging_utils import PerformanceTracker
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
+performance_tracker = PerformanceTracker()
 
 
 class ExcelToODCSParser:

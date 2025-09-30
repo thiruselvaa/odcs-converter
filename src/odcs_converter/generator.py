@@ -1,7 +1,6 @@
 """Main ODCS Converter implementation."""
 
 import json
-import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -12,9 +11,12 @@ from openpyxl.utils import get_column_letter
 from pydantic import ValidationError
 
 from .models import ODCSDataContract
+from .logging_config import get_logger
+from .logging_utils import PerformanceTracker
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
+performance_tracker = PerformanceTracker()
 
 
 class ODCSToExcelConverter:
@@ -39,6 +41,7 @@ class ODCSToExcelConverter:
             "alignment": Alignment(horizontal="left", vertical="top", wrap_text=True),
         }
 
+    @performance_tracker.track_performance("generator.generate_from_file")
     def generate_from_file(
         self, input_path: Union[str, Path], output_path: Union[str, Path]
     ) -> None:
@@ -57,6 +60,7 @@ class ODCSToExcelConverter:
 
         self.generate_from_dict(data, output_path)
 
+    @performance_tracker.track_performance("generator.generate_from_url")
     def generate_from_url(self, url: str, output_path: Union[str, Path]) -> None:
         """Generate Excel file from ODCS JSON URL.
 
@@ -75,6 +79,7 @@ class ODCSToExcelConverter:
 
         self.generate_from_dict(data, output_path)
 
+    @performance_tracker.track_performance("generator.generate_from_dict")
     def generate_from_dict(
         self, data: Dict[str, Any], output_path: Union[str, Path]
     ) -> None:
