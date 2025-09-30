@@ -7,8 +7,8 @@ This modern Python project generates Excel files from ODCS (Open Data Contract S
 ## Project Structure
 
 ```
-odcs-excel-generator/
-├── src/odcs_excel_generator/     # Main package source
+odcs-converter/
+├── src/odcs_converter/           # Main package source
 │   ├── __init__.py              # Package initialization
 │   ├── models.py                # Pydantic models for ODCS validation
 │   ├── generator.py             # Main Excel generation logic
@@ -46,7 +46,7 @@ odcs-excel-generator/
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Clone or navigate to the project
-cd odcs-excel-generator
+cd odcs-converter
 
 # Setup development environment with uv
 uv sync
@@ -60,7 +60,7 @@ uv run pre-commit install
 
 ```bash
 # Clone or navigate to the project
-cd odcs-excel-generator
+cd odcs-converter
 
 # Create virtual environment
 python -m venv venv
@@ -92,10 +92,10 @@ make build         # Build package using uv
 
 ```bash
 # Build image
-docker build -t odcs-excel-generator .
+docker build -t odcs-converter .
 
 # Run with mounted data directory
-docker run --rm -v $(pwd)/data:/app/data odcs-excel-generator examples/example_contract.json output.xlsx
+docker run --rm -v $(pwd)/data:/app/data odcs-converter examples/example_contract.json output.xlsx
 
 # Development with docker-compose
 docker-compose run dev

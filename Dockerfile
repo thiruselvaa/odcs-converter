@@ -33,5 +33,5 @@ USER appuser
 RUN mkdir -p /app/data
 
 # Set the default command
-ENTRYPOINT ["odcs-excel"]
+ENTRYPOINT ["odcs-converter"]
 CMD ["--help"]

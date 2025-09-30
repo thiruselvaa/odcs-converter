@@ -22,8 +22,8 @@ Thank you for your interest in contributing to ODCS Excel Generator! We welcome 
 
 ```bash
 # Fork the repository on GitHub first, then:
-git clone https://github.com/YOUR-USERNAME/odcs-excel-generator.git
-cd odcs-excel-generator
+git clone https://github.com/YOUR-USERNAME/odcs-converter.git
+cd odcs-converter
 ```
 
 ### 2. Set Up Development Environment

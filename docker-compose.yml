@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  odcs-excel-generator:
+  odcs-converter:
     build: .
     volumes:
       - ./data:/app/data
@@ -9,7 +9,7 @@ services:
     environment:
       - LOG_LEVEL=INFO
     working_dir: /app
-    
+
   dev:
     build: .
     volumes:
