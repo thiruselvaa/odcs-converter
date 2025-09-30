@@ -22,11 +22,26 @@ A modern Python project that generates Excel files from ODCS (Open Data Contract
 pip install odcs-excel-generator
 ```
 
+### Using uv (Recommended)
+
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install the package
+uv pip install odcs-excel-generator
+```
+
 ### From source
 
 ```bash
 git clone https://github.com/thiruselvaa/odcs-excel-generator.git
 cd odcs-excel-generator
+
+# Using uv (recommended)
+uv sync
+
+# Or using pip
 pip install -e ".[dev]"
 ```
 
@@ -92,9 +107,14 @@ The generated Excel file contains separate worksheets for each top-level ODCS fi
 # Clone the repository
 git clone https://github.com/thiruselvaa/odcs-excel-generator.git
 cd odcs-excel-generator
-```
 
-# Install dependencies
+# Using uv (recommended)
+uv sync
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Or using pip
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e ".[dev]"
 
 # Install pre-commit hooks
@@ -104,26 +124,32 @@ pre-commit install
 ### Running Tests
 
 ```bash
-# Run all tests
-pytest
+# With uv (recommended)
+uv run pytest
 
 # Run with coverage
-pytest --cov=src/odcs_excel_generator --cov-report=html
+uv run pytest --cov=src/odcs_excel_generator --cov-report=html
 
 # Run specific test
+uv run pytest tests/test_generator.py::test_basic_generation
+
+# Traditional way
+pytest
+pytest --cov=src/odcs_excel_generator --cov-report=html
 pytest tests/test_generator.py::test_basic_generation
 ```
 
 ### Code Quality
 
 ```bash
-# Format code
+# With uv (recommended)
+uv run black src/ tests/
+uv run ruff check src/ tests/
+uv run mypy src/
+
+# Traditional way
 black src/ tests/
-
-# Lint code
 ruff check src/ tests/
-
-# Type checking
 mypy src/
 ```
 

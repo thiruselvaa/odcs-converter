@@ -1,26 +1,40 @@
 help:
 	@echo "Available commands:"
-	@echo "  install     - Install package"
-	@echo "  test        - Run tests"
-	@echo "  lint        - Run linting"
-	@echo "  format      - Format code"
+	@echo "  install     - Install package with uv"
+	@echo "  install-pip - Install package with pip (fallback)"
+	@echo "  test        - Run tests with uv"
+	@echo "  lint        - Run linting with uv"
+	@echo "  format      - Format code with uv"
+	@echo "  type-check  - Run type checking with uv"
 	@echo "  clean       - Clean build artifacts"
 	@echo "  build       - Build package"
+	@echo "  dev         - Setup development environment"
 
 install:
+	uv sync
+
+install-pip:
 	pip install -e ".[dev]"
 
+dev:
+	uv sync
+	uv run pre-commit install
+
 test:
-	pytest --cov=src/odcs_excel_generator --cov-report=html
+	uv run pytest --cov=src/odcs_excel_generator --cov-report=html
 
 lint:
-	ruff check src/ tests/
+	uv run ruff check src/ tests/
 
 format:
-	black src/ tests/
+	uv run black src/ tests/
+	uv run ruff check --fix src/ tests/
+
+type-check:
+	uv run mypy src/
 
 clean:
-	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ htmlcov/
+	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ htmlcov/ .venv/
 
 build:
-	python -m build
+	uv build

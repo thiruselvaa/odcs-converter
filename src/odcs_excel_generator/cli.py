@@ -2,7 +2,6 @@
 
 import logging
 import sys
-from pathlib import Path
 from typing import Optional
 
 import click
@@ -21,7 +20,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(message)s",
     datefmt="[%X]",
-    handlers=[RichHandler(console=console, rich_tracebacks=True)]
+    handlers=[RichHandler(console=console, rich_tracebacks=True)],
 )
 
 logger = logging.getLogger(__name__)
@@ -31,23 +30,10 @@ logger = logging.getLogger(__name__)
 @click.argument("input_source", type=str)
 @click.argument("output_file", type=click.Path())
 @click.option(
-    "--config",
-    "-c",
-    type=click.Path(exists=True),
-    help="Path to configuration file"
+    "--config", "-c", type=click.Path(exists=True), help="Path to configuration file"
 )
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    help="Enable verbose logging"
-)
-@click.option(
-    "--quiet",
-    "-q",  
-    is_flag=True,
-    help="Suppress output except errors"
-)
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose logging")
+@click.option("--quiet", "-q", is_flag=True, help="Suppress output except errors")
 def main(
     input_source: str,
     output_file: str,
@@ -56,16 +42,16 @@ def main(
     quiet: bool = False,
 ) -> None:
     """Generate Excel files from ODCS (Open Data Contract Standard) JSON schema.
-    
+
     INPUT_SOURCE can be either a local JSON file path or a URL to JSON data.
     OUTPUT_FILE is the path where the Excel file will be saved.
-    
+
     Examples:
-    
+
         odcs-excel contract.json output.xlsx
-        
+
         odcs-excel https://example.com/contract.json output.xlsx
-        
+
         odcs-excel contract.json output.xlsx --config config.yaml
     """
     # Configure logging level
@@ -73,7 +59,7 @@ def main(
         logging.getLogger().setLevel(logging.ERROR)
     elif verbose:
         logging.getLogger().setLevel(logging.DEBUG)
-    
+
     try:
         # Load configuration if provided
         style_config = None
@@ -81,31 +67,33 @@ def main(
             logger.info(f"Loading configuration from: {config}")
             # TODO: Implement configuration loading
             # style_config = load_config(config)
-        
+
         # Initialize generator
         generator = ODCSExcelGenerator(style_config=style_config)
-        
+
         # Determine input type (file or URL)
         is_url = input_source.startswith(("http://", "https://"))
-        
+
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=console,
             transient=True,
         ) as progress:
-            
+
             if is_url:
                 task = progress.add_task("Fetching data from URL...", total=None)
                 generator.generate_from_url(input_source, output_file)
             else:
                 task = progress.add_task("Processing local file...", total=None)
                 generator.generate_from_file(input_source, output_file)
-            
+
             progress.update(task, description="Generating Excel file...")
-            
-        console.print(f"✅ Excel file generated successfully: [bold green]{output_file}[/bold green]")
-        
+
+        console.print(
+            f"✅ Excel file generated successfully: [bold green]{output_file}[/bold green]"
+        )
+
     except FileNotFoundError as e:
         console.print(f"❌ [bold red]Error:[/bold red] {e}")
         sys.exit(1)
@@ -114,7 +102,7 @@ def main(
         sys.exit(1)
     except Exception as e:
         logger.exception("Unexpected error occurred")
-        console.print(f"❌ [bold red]Unexpected error:[/bold red] {e}") 
+        console.print(f"❌ [bold red]Unexpected error:[/bold red] {e}")
         sys.exit(1)
 
 
@@ -122,7 +110,10 @@ def main(
 def version() -> None:
     """Show version information."""
     from . import __version__
-    console.print(f"ODCS Excel Generator version: [bold green]{__version__}[/bold green]")
+
+    console.print(
+        f"ODCS Excel Generator version: [bold green]{__version__}[/bold green]"
+    )
 
 
 @click.group()

@@ -39,6 +39,25 @@ odcs-excel-generator/
 
 ### 1. Local Development Setup
 
+#### Using uv (Recommended)
+
+```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone or navigate to the project
+cd odcs-excel-generator
+
+# Setup development environment with uv
+uv sync
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install pre-commit hooks
+uv run pre-commit install
+```
+
+#### Using pip (Fallback)
+
 ```bash
 # Clone or navigate to the project
 cd odcs-excel-generator
@@ -58,12 +77,15 @@ pre-commit install
 
 ```bash
 make help          # Show available commands
-make install       # Install package
-make test          # Run tests with coverage
-make lint          # Run code linting
-make format        # Format code
+make install       # Install package with uv
+make install-pip   # Install package with pip (fallback)
+make dev           # Setup complete development environment
+make test          # Run tests with coverage using uv
+make lint          # Run code linting using uv
+make format        # Format code using uv
+make type-check    # Run type checking using uv
 make clean         # Clean build artifacts
-make build         # Build package
+make build         # Build package using uv
 ```
 
 ### 3. Using Docker
@@ -130,6 +152,24 @@ The generated Excel file contains these worksheets:
 
 ## Testing
 
+### Using uv (Recommended)
+
+```bash
+# Run all tests
+uv run pytest
+
+# With coverage report
+uv run pytest --cov=src/odcs_excel_generator --cov-report=html
+
+# Run specific test
+uv run pytest tests/test_generator.py::TestODCSExcelGenerator::test_generate_from_dict
+
+# Using make command
+make test
+```
+
+### Using pip (Fallback)
+
 ```bash
 # Run all tests
 pytest
@@ -144,23 +184,40 @@ pytest tests/test_generator.py::TestODCSExcelGenerator::test_generate_from_dict
 ## Code Quality
 
 This project uses modern Python tooling:
+- **uv**: Fast Python package installer and resolver
 - **Black**: Code formatting
 - **Ruff**: Fast linting and import sorting
 - **MyPy**: Static type checking
 - **Pytest**: Testing framework with coverage
 - **Pre-commit**: Git hooks for code quality
 
+### Running Quality Checks
+
+```bash
+# Using uv (recommended)
+uv run black src/ tests/         # Format code
+uv run ruff check src/ tests/    # Lint code
+uv run mypy src/                 # Type checking
+
+# Using make commands
+make format      # Format and fix code
+make lint        # Run linting
+make type-check  # Run type checking
+```
+
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make changes with tests
-4. Run quality checks: `make lint && make test`
-5. Commit with pre-commit hooks
-6. Submit a pull request
+3. Setup development environment: `uv sync`
+4. Make changes with tests
+5. Run quality checks: `make lint && make test`
+6. Commit with pre-commit hooks
+7. Submit a pull request
 
 ## Modern Python Features
 
+- **uv**: Ultra-fast Python package installer and resolver
 - **PEP 621**: Metadata in pyproject.toml
 - **Type hints**: Full type annotation coverage
 - **Pydantic v2**: Data validation and serialization
@@ -171,5 +228,5 @@ This project uses modern Python tooling:
 - **GitHub Actions**: Automated CI/CD
 - **Docker**: Containerized deployment
 
-This project follows all modern Python best practices for 2024!
+This project follows all modern Python best practices for 2025!
 

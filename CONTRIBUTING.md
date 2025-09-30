@@ -29,30 +29,32 @@ cd odcs-excel-generator
 ### 2. Set Up Development Environment
 
 ```bash
-# Create a virtual environment
+# Using uv (recommended)
+uv sync
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Or using pip (fallback)
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -e ".[dev]"
 
 # Install pre-commit hooks
-pre-commit install
+uv run pre-commit install  # or just: pre-commit install
 ```
 
 ### 3. Verify Setup
 
 ```bash
 # Run tests
-pytest
+uv run pytest
 
 # Check code quality
-black --check src/ tests/
-ruff check src/ tests/
-mypy src/
+uv run black --check src/ tests/
+uv run ruff check src/ tests/
+uv run mypy src/
 
 # Test the CLI
-odcs-excel examples/example_contract.json test_output.xlsx
+uv run odcs-excel examples/example_contract.json test_output.xlsx
 ```
 
 ## 🔄 Development Workflow
@@ -80,10 +82,10 @@ Use descriptive branch names:
 3. **Test your changes**:
    ```bash
    # Run the full test suite
-   make test
+   make test  # or: uv run pytest
    
    # Run specific tests
-   pytest tests/test_generator.py::test_your_specific_test
+   uv run pytest tests/test_generator.py::test_your_specific_test
    
    # Test with different Python versions (if available)
    tox
@@ -223,7 +225,7 @@ def process_schema_objects(
 
 2. **Run the full test suite**:
    ```bash
-   make test-all
+   make test  # or: uv run pytest
    ```
 
 3. **Update documentation** if needed
