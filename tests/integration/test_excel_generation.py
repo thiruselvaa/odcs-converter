@@ -1,8 +1,6 @@
 """Integration tests for Excel generation workflows."""
 
-import json
 import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from odcs_converter.generator import ODCSToExcelConverter
@@ -31,12 +29,21 @@ class TestExcelGenerationWorkflow:
 
         # Verify Excel structure using openpyxl
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
 
         expected_sheets = [
-            "Basic Information", "Tags", "Description", "Servers",
-            "Schema", "Support", "Team", "Roles", "SLA Properties",
-            "Authoritative Definitions", "Custom Properties"
+            "Basic Information",
+            "Tags",
+            "Description",
+            "Servers",
+            "Schema",
+            "Support",
+            "Team",
+            "Roles",
+            "SLA Properties",
+            "Authoritative Definitions",
+            "Custom Properties",
         ]
 
         for sheet_name in expected_sheets:
@@ -73,6 +80,7 @@ class TestExcelGenerationWorkflow:
         assert excel_file.exists()
 
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
         assert len(workbook.sheetnames) >= 5
 
@@ -97,7 +105,9 @@ class TestExcelGenerationWorkflow:
 
         custom_style = {
             "header_font": Font(bold=True, color="FF0000"),  # Red
-            "header_fill": PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid"),  # Yellow
+            "header_fill": PatternFill(
+                start_color="FFFF00", end_color="FFFF00", fill_type="solid"
+            ),  # Yellow
             "alignment": Alignment(horizontal="center", vertical="center"),
         }
 
@@ -111,6 +121,7 @@ class TestExcelGenerationWorkflow:
         assert excel_file.exists()
 
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
 
         # Check that basic information sheet has styling applied
@@ -121,7 +132,7 @@ class TestExcelGenerationWorkflow:
         # Here we just verify the file was created with custom styling
         assert header_cell.value == "Field"
 
-    @patch('odcs_converter.generator.requests.get')
+    @patch("odcs_converter.generator.requests.get")
     def test_generate_excel_from_url_workflow(
         self, mock_get, sample_odcs_complete, temp_dir
     ):
@@ -144,12 +155,11 @@ class TestExcelGenerationWorkflow:
         assert excel_file.exists()
 
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
         assert "Basic Information" in workbook.sheetnames
 
-    def test_generate_excel_with_minimal_data(
-        self, sample_odcs_minimal, temp_dir
-    ):
+    def test_generate_excel_with_minimal_data(self, sample_odcs_minimal, temp_dir):
         """Test Excel generation with minimal ODCS data."""
         converter = ODCSToExcelConverter()
         excel_file = temp_dir / "minimal_excel.xlsx"
@@ -161,6 +171,7 @@ class TestExcelGenerationWorkflow:
         assert excel_file.exists()
 
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
 
         # Should have basic information sheet at minimum
@@ -189,9 +200,9 @@ class TestExcelGenerationWorkflow:
                 {
                     "server": "test",
                     "type": "unknown_type",  # Invalid type
-                    "port": "not_a_number"
+                    "port": "not_a_number",
                 }
-            ]
+            ],
         }
 
         converter = ODCSToExcelConverter()
@@ -204,6 +215,7 @@ class TestExcelGenerationWorkflow:
         assert excel_file.exists()
 
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
         assert "Basic Information" in workbook.sheetnames
         assert "Servers" in workbook.sheetnames
@@ -264,7 +276,7 @@ class TestExcelGenerationWorkflow:
                     "description": f"Server {i} for large dataset testing",
                     "host": f"server{i}.example.com",
                     "port": 5432 + i,
-                    "database": f"db_{i}"
+                    "database": f"db_{i}",
                 }
                 for i in range(50)  # 50 servers
             ],
@@ -273,17 +285,14 @@ class TestExcelGenerationWorkflow:
                     "username": f"user{i}@example.com",
                     "name": f"User {i}",
                     "role": f"Role {i % 10}",
-                    "description": f"Team member {i}"
+                    "description": f"Team member {i}",
                 }
                 for i in range(30)  # 30 team members
             ],
             "customProperties": [
-                {
-                    "property": f"property_{i}",
-                    "value": f"value_{i}"
-                }
+                {"property": f"property_{i}", "value": f"value_{i}"}
                 for i in range(25)  # 25 custom properties
-            ]
+            ],
         }
 
         converter = ODCSToExcelConverter()
@@ -298,6 +307,7 @@ class TestExcelGenerationWorkflow:
         assert excel_file.stat().st_size > 10000  # At least 10KB
 
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
 
         # Verify tags sheet has all tags
@@ -338,16 +348,16 @@ class TestExcelGenerationWorkflow:
             "description": {
                 "usage": "A" * 1000,  # 1KB string
                 "purpose": "B" * 1000,
-                "limitations": "C" * 1000
+                "limitations": "C" * 1000,
             },
             "servers": [
                 {
                     "server": f"server_{i}",
                     "type": "postgresql",
-                    "description": "X" * 500  # 500 bytes per server
+                    "description": "X" * 500,  # 500 bytes per server
                 }
                 for i in range(20)
-            ]
+            ],
         }
 
         converter = ODCSToExcelConverter()
@@ -364,13 +374,15 @@ class TestExcelGenerationWorkflow:
         memory_growth = final_memory - initial_memory
 
         # Memory growth should be reasonable (less than 50MB for this test)
-        assert memory_growth < 50 * 1024 * 1024, f"Excessive memory growth: {memory_growth / 1024 / 1024:.2f}MB"
+        assert (
+            memory_growth < 50 * 1024 * 1024
+        ), f"Excessive memory growth: {memory_growth / 1024 / 1024:.2f}MB"
 
         # Verify all files were created
         for excel_file in excel_files:
             assert excel_file.exists()
 
-    @patch('odcs_converter.generator.requests.get')
+    @patch("odcs_converter.generator.requests.get")
     def test_url_error_handling_workflow(self, mock_get, temp_dir):
         """Test error handling in URL-based workflow."""
         from requests import RequestException
@@ -382,7 +394,9 @@ class TestExcelGenerationWorkflow:
         excel_file = temp_dir / "error_test.xlsx"
 
         with pytest.raises(ValueError, match="Failed to fetch data from URL"):
-            converter.generate_from_url("https://invalid-url.com/contract.json", excel_file)
+            converter.generate_from_url(
+                "https://invalid-url.com/contract.json", excel_file
+            )
 
         # Verify no file was created
         assert not excel_file.exists()
@@ -398,7 +412,9 @@ class TestExcelGenerationWorkflow:
         with pytest.raises(Exception):  # Should raise some form of file error
             converter.generate_from_dict(sample_odcs_minimal, invalid_path)
 
-    def test_excel_generation_output_directory_creation(self, sample_odcs_minimal, temp_dir):
+    def test_excel_generation_output_directory_creation(
+        self, sample_odcs_minimal, temp_dir
+    ):
         """Test that output directories are created automatically."""
         converter = ODCSToExcelConverter()
 
@@ -422,6 +438,7 @@ class TestExcelGenerationWorkflow:
 
         # Verify
         from openpyxl import load_workbook
+
         workbook = load_workbook(excel_file)
 
         # Check that columns have been auto-sized (width > 0)
@@ -431,4 +448,6 @@ class TestExcelGenerationWorkflow:
                 column_letter = column[0].column_letter
                 width = sheet.column_dimensions[column_letter].width
                 # Auto-sized columns should have width > 0
-                assert width > 0, f"Column {column_letter} in {sheet_name} has zero width"
+                assert (
+                    width > 0
+                ), f"Column {column_letter} in {sheet_name} has zero width"

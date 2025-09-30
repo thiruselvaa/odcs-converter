@@ -1,16 +1,10 @@
 """Example end-to-end test demonstrating full workflow testing."""
 
 import json
-import tempfile
 from pathlib import Path
 import pytest
 
 from tests.end_to_end.utils import (
-    EndToEndTestHelper,
-    CLITestHelper,
-    PerformanceTestHelper,
-    ScenarioTestHelper,
-    ErrorScenarioTestHelper,
     e2e_test,
     slow_e2e_test,
     cli_test,
@@ -209,9 +203,9 @@ class TestCLIWorkflows:
         key_fields = ["version", "kind", "apiVersion", "id", "status", "name"]
         for field in key_fields:
             if field in complete_odcs_data:
-                assert final_data.get(field) == complete_odcs_data.get(field), (
-                    f"Field {field} changed during roundtrip"
-                )
+                assert final_data.get(field) == complete_odcs_data.get(
+                    field
+                ), f"Field {field} changed during roundtrip"
 
 
 @pytest.mark.e2e
@@ -241,9 +235,9 @@ class TestPerformanceWorkflows:
 
         # Performance should be reasonable (under 30 seconds for large datasets)
         assert small_times["odcs_to_excel"] < 5.0, "Small dataset conversion too slow"
-        assert medium_times["odcs_to_excel"] < 15.0, (
-            "Medium dataset conversion too slow"
-        )
+        assert (
+            medium_times["odcs_to_excel"] < 15.0
+        ), "Medium dataset conversion too slow"
         assert large_times["odcs_to_excel"] < 30.0, "Large dataset conversion too slow"
 
         # Excel to ODCS should also be reasonable
@@ -287,9 +281,9 @@ class TestErrorHandlingWorkflows:
         ]
 
         for expected_error in expected_errors:
-            assert expected_error in errors_handled, (
-                f"Missing error handling: {expected_error}"
-            )
+            assert (
+                expected_error in errors_handled
+            ), f"Missing error handling: {expected_error}"
 
     @e2e_test
     def test_data_corruption_scenarios(self, temp_dir, error_scenario_test_helper):
@@ -304,9 +298,9 @@ class TestErrorHandlingWorkflows:
         ]
 
         for expected_scenario in expected_scenarios:
-            assert expected_scenario in scenarios_tested, (
-                f"Missing scenario handling: {expected_scenario}"
-            )
+            assert (
+                expected_scenario in scenarios_tested
+            ), f"Missing scenario handling: {expected_scenario}"
 
     @e2e_test
     def test_invalid_cli_usage(self, cli_test_helper):

@@ -11,7 +11,6 @@ from openpyxl import load_workbook
 from odcs_converter.generator import ODCSToExcelConverter
 from odcs_converter.excel_parser import ExcelToODCSParser
 from odcs_converter.yaml_converter import YAMLConverter
-from odcs_converter.models import ODCSDataContract
 
 
 class TestODCSToExcelConverter:
@@ -28,24 +27,17 @@ class TestODCSToExcelConverter:
             "name": "Test Contract",
             "status": "active",
             "tags": ["test", "example"],
-            "description": {
-                "usage": "Test usage",
-                "purpose": "Testing purposes"
-            },
+            "description": {"usage": "Test usage", "purpose": "Testing purposes"},
             "servers": [
                 {
                     "server": "test-server",
                     "type": "snowflake",
-                    "description": "Test server"
+                    "description": "Test server",
                 }
             ],
             "team": [
-                {
-                    "username": "test@example.com",
-                    "name": "Test User",
-                    "role": "owner"
-                }
-            ]
+                {"username": "test@example.com", "name": "Test User", "role": "owner"}
+            ],
         }
 
     @pytest.fixture
@@ -55,7 +47,7 @@ class TestODCSToExcelConverter:
 
     def test_generate_from_dict(self, converter, sample_odcs_data):
         """Test generating Excel from ODCS dictionary."""
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp_file:
             output_path = tmp_file.name
 
         try:
@@ -67,8 +59,11 @@ class TestODCSToExcelConverter:
             # Verify Excel structure
             workbook = load_workbook(output_path)
             expected_sheets = [
-                "Basic Information", "Tags", "Description",
-                "Servers", "Team"
+                "Basic Information",
+                "Tags",
+                "Description",
+                "Servers",
+                "Team",
             ]
 
             for sheet_name in expected_sheets:
@@ -79,11 +74,13 @@ class TestODCSToExcelConverter:
 
     def test_generate_from_file(self, converter, sample_odcs_data):
         """Test generating Excel from JSON file."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as json_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as json_file:
             json.dump(sample_odcs_data, json_file)
             json_file_path = json_file.name
 
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as excel_file:
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as excel_file:
             excel_file_path = excel_file.name
 
         try:
@@ -94,7 +91,7 @@ class TestODCSToExcelConverter:
             Path(json_file_path).unlink(missing_ok=True)
             Path(excel_file_path).unlink(missing_ok=True)
 
-    @patch('requests.get')
+    @patch("requests.get")
     def test_generate_from_url(self, mock_get, converter, sample_odcs_data):
         """Test generating Excel from URL."""
         # Mock HTTP response
@@ -103,11 +100,13 @@ class TestODCSToExcelConverter:
         mock_response.raise_for_status.return_value = None
         mock_get.return_value = mock_response
 
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp_file:
             output_path = tmp_file.name
 
         try:
-            converter.generate_from_url("https://example.com/contract.json", output_path)
+            converter.generate_from_url(
+                "https://example.com/contract.json", output_path
+            )
             assert Path(output_path).exists()
 
         finally:
@@ -120,8 +119,9 @@ class TestODCSToExcelConverter:
 
     def test_invalid_url_error(self, converter):
         """Test handling of invalid URL."""
-        with patch('odcs_converter.generator.requests.get') as mock_get:
+        with patch("odcs_converter.generator.requests.get") as mock_get:
             from requests import RequestException
+
             mock_get.side_effect = RequestException("Network error")
 
             with pytest.raises(ValueError, match="Failed to fetch data from URL"):
@@ -143,17 +143,15 @@ class TestExcelToODCSParser:
             "Basic Information": {
                 "Field": ["version", "kind", "apiVersion", "id", "status"],
                 "Value": ["1.0.0", "DataContract", "v3.0.2", "test-001", "active"],
-                "Description": ["Version", "Kind", "API Version", "ID", "Status"]
+                "Description": ["Version", "Kind", "API Version", "ID", "Status"],
             },
-            "Tags": {
-                "Tag": ["test", "example", "sample"]
-            }
+            "Tags": {"Tag": ["test", "example", "sample"]},
         }
 
     def test_convert_value(self, parser):
         """Test value conversion utilities."""
-        assert parser._convert_value("true") == True
-        assert parser._convert_value("false") == False
+        assert parser._convert_value("true")
+        assert not parser._convert_value("false")
         assert parser._convert_value("123") == 123
         assert parser._convert_value("123.45") == 123.45
         assert parser._convert_value("text") == "text"
@@ -166,13 +164,9 @@ class TestExcelToODCSParser:
             "field1": "value1",
             "field2": None,
             "field3": "",
-            "field4": {
-                "nested1": "value",
-                "nested2": None,
-                "nested3": ""
-            },
+            "field4": {"nested1": "value", "nested2": None, "nested3": ""},
             "field5": ["item1", "", None, "item2"],
-            "field6": []
+            "field6": [],
         }
 
         cleaned = parser._clean_data(dirty_data)
@@ -180,7 +174,7 @@ class TestExcelToODCSParser:
         expected = {
             "field1": "value1",
             "field4": {"nested1": "value"},
-            "field5": ["item1", "item2"]
+            "field5": ["item1", "item2"],
         }
 
         assert cleaned == expected
@@ -200,10 +194,10 @@ class TestExcelToODCSParser:
             "kind": "DataContract",
             "apiVersion": "v3.0.2",
             "id": "test-001",
-            "status": "active"
+            "status": "active",
         }
 
-        assert parser.validate_odcs_data(valid_data) == True
+        assert parser.validate_odcs_data(valid_data)
 
     def test_validate_odcs_data_invalid(self, parser):
         """Test ODCS data validation with invalid data."""
@@ -212,7 +206,7 @@ class TestExcelToODCSParser:
             # Missing required fields
         }
 
-        assert parser.validate_odcs_data(invalid_data) == False
+        assert not parser.validate_odcs_data(invalid_data)
 
 
 class TestYAMLConverter:
@@ -225,11 +219,8 @@ class TestYAMLConverter:
             "version": "1.0.0",
             "kind": "DataContract",
             "apiVersion": "v3.0.2",
-            "description": {
-                "usage": "Test usage",
-                "purpose": "Testing"
-            },
-            "tags": ["test", "yaml"]
+            "description": {"usage": "Test usage", "purpose": "Testing"},
+            "tags": ["test", "yaml"],
         }
 
     def test_dict_to_yaml_string(self, sample_data):
@@ -250,7 +241,9 @@ class TestYAMLConverter:
 
     def test_dict_to_yaml_file(self, sample_data):
         """Test converting dictionary to YAML file."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as tmp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False
+        ) as tmp_file:
             yaml_file_path = tmp_file.name
 
         try:
@@ -272,10 +265,10 @@ class TestYAMLConverter:
 
     def test_is_yaml_file(self):
         """Test YAML file detection."""
-        assert YAMLConverter.is_yaml_file("test.yaml") == True
-        assert YAMLConverter.is_yaml_file("test.yml") == True
-        assert YAMLConverter.is_yaml_file("test.json") == False
-        assert YAMLConverter.is_yaml_file("test.txt") == False
+        assert YAMLConverter.is_yaml_file("test.yaml")
+        assert YAMLConverter.is_yaml_file("test.yml")
+        assert not YAMLConverter.is_yaml_file("test.json")
+        assert not YAMLConverter.is_yaml_file("test.txt")
 
     def test_normalize_yaml_extension(self):
         """Test YAML extension normalization."""
@@ -313,7 +306,7 @@ class TestIntegrationBidirectional:
             "description": {
                 "usage": "Integration testing",
                 "purpose": "Test bidirectional conversion",
-                "limitations": "Test environment only"
+                "limitations": "Test environment only",
             },
             "servers": [
                 {
@@ -321,30 +314,27 @@ class TestIntegrationBidirectional:
                     "type": "snowflake",
                     "description": "Integration test server",
                     "database": "TEST_DB",
-                    "schema": "PUBLIC"
+                    "schema": "PUBLIC",
                 }
             ],
             "team": [
                 {
                     "username": "tester@example.com",
                     "name": "Integration Tester",
-                    "role": "owner"
+                    "role": "owner",
                 }
             ],
-            "customProperties": [
-                {
-                    "property": "testProperty",
-                    "value": "testValue"
-                }
-            ]
+            "customProperties": [{"property": "testProperty", "value": "testValue"}],
         }
 
     def test_odcs_to_excel_to_odcs_roundtrip_json(self, sample_odcs_data):
         """Test complete roundtrip: ODCS JSON → Excel → ODCS JSON."""
         # Create temporary files
-        json_input = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
-        excel_temp = tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False)
-        json_output = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json_input = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        excel_temp = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
+        json_output = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        )
 
         try:
             # Step 1: Write original ODCS data
@@ -368,7 +358,7 @@ class TestIntegrationBidirectional:
 
             # Step 4: Write parsed data
             json_output.close()
-            with open(json_output.name, 'w') as f:
+            with open(json_output.name, "w") as f:
                 json.dump(parsed_data, f, indent=2)
 
             # Step 5: Verify essential data integrity
@@ -390,9 +380,11 @@ class TestIntegrationBidirectional:
     def test_odcs_to_excel_to_odcs_roundtrip_yaml(self, sample_odcs_data):
         """Test complete roundtrip: ODCS YAML → Excel → ODCS YAML."""
         # Create temporary files
-        yaml_input = tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False)
-        excel_temp = tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False)
-        yaml_output = tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False)
+        yaml_input = tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False)
+        excel_temp = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
+        yaml_output = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".yaml", delete=False
+        )
 
         try:
             # Step 1: Write original ODCS data as YAML

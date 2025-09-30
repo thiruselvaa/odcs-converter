@@ -2,8 +2,6 @@
 
 import json
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 from odcs_converter.excel_parser import ExcelToODCSParser
 from odcs_converter.generator import ODCSToExcelConverter
@@ -28,7 +26,7 @@ class TestExcelParsingWorkflow:
         parsed_data = parser.parse_from_file(excel_file)
 
         # Save to JSON
-        with open(json_output, 'w', encoding='utf-8') as f:
+        with open(json_output, "w", encoding="utf-8") as f:
             json.dump(parsed_data, f, indent=2)
 
         # Verify
@@ -108,7 +106,7 @@ class TestExcelParsingWorkflow:
             ["kind", "DataContract", "Kind"],
             ["apiVersion", "v3.0.2", "API Version"],
             ["id", "minimal-001", "ID"],
-            ["status", "active", "Status"]
+            ["status", "active", "Status"],
         ]
         for row in basic_data:
             basic_sheet.append(row)
@@ -186,7 +184,7 @@ class TestExcelParsingWorkflow:
             ["kind", "DataContract", "Kind"],
             ["apiVersion", "v3.0.2", "API Version"],
             ["id", "type-test-001", "ID"],
-            ["status", "active", "Status"]
+            ["status", "active", "Status"],
         ]
         for row in basic_data:
             basic_sheet.append(row)
@@ -201,7 +199,7 @@ class TestExcelParsingWorkflow:
             ["booleanTrue", "true"],
             ["booleanFalse", "false"],
             ["numericString", "123"],
-            ["floatString", "45.67"]
+            ["floatString", "45.67"],
         ]
         for row in props_data:
             props_sheet.append(row)
@@ -212,7 +210,7 @@ class TestExcelParsingWorkflow:
             ["Server", "Type", "Port", "Host"],
             ["db1", "postgresql", 5432, "localhost"],
             ["db2", "mysql", "3306", "remote.host"],
-            ["db3", "redis", 6379, "cache.server"]
+            ["db3", "redis", 6379, "cache.server"],
         ]
         for row in servers_data:
             servers_sheet.append(row)
@@ -262,7 +260,7 @@ class TestExcelParsingWorkflow:
             ["id", "cleaning-001", "ID"],
             ["status", "active", "Status"],
             ["name", "", "Empty name"],  # Empty value
-            ["tenant", None, "None value"]  # None value
+            ["tenant", None, "None value"],  # None value
         ]
         for row in basic_data:
             basic_sheet.append(row)
@@ -283,7 +281,7 @@ class TestExcelParsingWorkflow:
             ["emptyProp", ""],
             ["noneProp", None],
             ["", "orphanValue"],  # Empty property name
-            ["validProp2", "validValue2"]
+            ["validProp2", "validValue2"],
         ]
         for row in props_data:
             props_sheet.append(row)
@@ -331,7 +329,7 @@ class TestExcelParsingWorkflow:
 
         # Step 3: Save parsed data
         json_output = temp_dir / "roundtrip_output.json"
-        with open(json_output, 'w', encoding='utf-8') as f:
+        with open(json_output, "w", encoding="utf-8") as f:
             json.dump(parsed_data, f, indent=2)
 
         # Step 4: Verify data integrity
@@ -367,7 +365,7 @@ class TestExcelParsingWorkflow:
             ["kind", "DataContract", "Kind"],
             ["apiVersion", "v3.0.2", "API Version"],
             ["id", "error-recovery-001", "ID"],
-            ["status", "active", "Status"]
+            ["status", "active", "Status"],
         ]
         for row in basic_data:
             basic_sheet.append(row)
@@ -379,7 +377,7 @@ class TestExcelParsingWorkflow:
             ["valid_server", "postgresql", 5432, "localhost"],
             ["", "mysql", "invalid_port", ""],  # Empty server name, invalid port
             ["server2", "unknown_type", 3306, "host2"],  # Unknown type
-            ["server3", "", "", "host3"]  # Missing type
+            ["server3", "", "", "host3"],  # Missing type
         ]
         for row in servers_data:
             servers_sheet.append(row)
@@ -419,7 +417,7 @@ class TestExcelParsingWorkflow:
             ["kind", "DataContract", "Kind"],
             ["apiVersion", "v3.0.2", "API Version"],
             ["id", "performance-test-001", "ID"],
-            ["status", "active", "Status"]
+            ["status", "active", "Status"],
         ]
         for row in basic_data:
             basic_sheet.append(row)
@@ -434,13 +432,15 @@ class TestExcelParsingWorkflow:
         servers_sheet = wb.create_sheet("Servers")
         servers_data = [["Server", "Type", "Host", "Port", "Database"]]
         for i in range(100):  # 100 servers
-            servers_data.append([
-                f"server_{i}",
-                "postgresql",
-                f"host{i}.example.com",
-                5432 + i,
-                f"db_{i}"
-            ])
+            servers_data.append(
+                [
+                    f"server_{i}",
+                    "postgresql",
+                    f"host{i}.example.com",
+                    5432 + i,
+                    f"db_{i}",
+                ]
+            )
         for row in servers_data:
             servers_sheet.append(row)
 
@@ -489,6 +489,7 @@ class TestExcelParsingWorkflow:
         for i in range(5):
             # Create and parse Excel file
             from openpyxl import Workbook
+
             wb = Workbook()
             wb.remove(wb.active)
 
@@ -500,7 +501,7 @@ class TestExcelParsingWorkflow:
                 ["kind", "DataContract"],
                 ["apiVersion", "v3.0.2"],
                 ["id", f"memory-test-{i}"],
-                ["status", "active"]
+                ["status", "active"],
             ]
             for row in basic_data:
                 basic_sheet.append(row)
@@ -526,4 +527,6 @@ class TestExcelParsingWorkflow:
         memory_growth = final_memory - initial_memory
 
         # Memory growth should be reasonable (less than 25MB for this test)
-        assert memory_growth < 25 * 1024 * 1024, f"Excessive memory growth: {memory_growth / 1024 / 1024:.2f}MB"
+        assert (
+            memory_growth < 25 * 1024 * 1024
+        ), f"Excessive memory growth: {memory_growth / 1024 / 1024:.2f}MB"

@@ -1,6 +1,5 @@
 """Test cases specifically for Excel to ODCS parsing functionality."""
 
-import json
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -38,7 +37,7 @@ class TestExcelToODCSParser:
             ["apiVersion", "v3.0.2", "API Version"],
             ["id", "test-001", "Unique Identifier"],
             ["status", "active", "Status"],
-            ["name", "Test Contract", "Contract Name"]
+            ["name", "Test Contract", "Contract Name"],
         ]
         for row in basic_data:
             basic_sheet.append(row)
@@ -56,7 +55,7 @@ class TestExcelToODCSParser:
             ["Field", "Value"],
             ["usage", "Test usage description"],
             ["purpose", "Testing Excel parser"],
-            ["limitations", "Test environment only"]
+            ["limitations", "Test environment only"],
         ]
         for row in desc_data:
             desc_sheet.append(row)
@@ -64,9 +63,33 @@ class TestExcelToODCSParser:
         # Servers sheet
         servers_sheet = wb.create_sheet("Servers")
         servers_data = [
-            ["Server", "Type", "Description", "Environment", "Host", "Port", "Database"],
-            ["test-server", "postgresql", "Test database", "test", "localhost", "5432", "testdb"],
-            ["prod-server", "snowflake", "Production database", "prod", "prod.snowflake.com", "", "PROD_DB"]
+            [
+                "Server",
+                "Type",
+                "Description",
+                "Environment",
+                "Host",
+                "Port",
+                "Database",
+            ],
+            [
+                "test-server",
+                "postgresql",
+                "Test database",
+                "test",
+                "localhost",
+                "5432",
+                "testdb",
+            ],
+            [
+                "prod-server",
+                "snowflake",
+                "Production database",
+                "prod",
+                "prod.snowflake.com",
+                "",
+                "PROD_DB",
+            ],
         ]
         for row in servers_data:
             servers_sheet.append(row)
@@ -76,7 +99,7 @@ class TestExcelToODCSParser:
         team_data = [
             ["Username", "Name", "Role", "Description"],
             ["test@example.com", "Test User", "owner", "Test team member"],
-            ["dev@example.com", "Developer", "contributor", "Development team"]
+            ["dev@example.com", "Developer", "contributor", "Development team"],
         ]
         for row in team_data:
             team_sheet.append(row)
@@ -87,13 +110,13 @@ class TestExcelToODCSParser:
             ["Property", "Value"],
             ["environment", "test"],
             ["dataRetentionDays", "365"],
-            ["isActive", "true"]
+            ["isActive", "true"],
         ]
         for row in props_data:
             props_sheet.append(row)
 
         # Save to temporary file
-        temp_file = tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False)
+        temp_file = tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False)
         wb.save(temp_file.name)
         wb.close()
 
@@ -147,17 +170,38 @@ class TestExcelToODCSParser:
             assert isinstance(result["customProperties"], list)
 
             # Find specific custom properties
-            env_prop = next((p for p in result["customProperties"] if p.get("property") == "environment"), None)
+            env_prop = next(
+                (
+                    p
+                    for p in result["customProperties"]
+                    if p.get("property") == "environment"
+                ),
+                None,
+            )
             assert env_prop is not None
             assert env_prop.get("value") == "test"
 
-            retention_prop = next((p for p in result["customProperties"] if p.get("property") == "dataRetentionDays"), None)
+            retention_prop = next(
+                (
+                    p
+                    for p in result["customProperties"]
+                    if p.get("property") == "dataRetentionDays"
+                ),
+                None,
+            )
             assert retention_prop is not None
             assert retention_prop.get("value") == 365  # Should be converted to int
 
-            active_prop = next((p for p in result["customProperties"] if p.get("property") == "isActive"), None)
+            active_prop = next(
+                (
+                    p
+                    for p in result["customProperties"]
+                    if p.get("property") == "isActive"
+                ),
+                None,
+            )
             assert active_prop is not None
-            assert active_prop.get("value") == True  # Should be converted to boolean
+            assert active_prop.get("value")  # Should be converted to boolean
 
         finally:
             Path(sample_excel_file).unlink(missing_ok=True)
@@ -170,7 +214,9 @@ class TestExcelToODCSParser:
     def test_parse_invalid_excel_file(self, parser):
         """Test handling of invalid Excel file."""
         # Create a text file with .xlsx extension
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.xlsx', delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".xlsx", delete=False
+        ) as temp_file:
             temp_file.write("This is not an Excel file")
             temp_file_path = temp_file.name
 
@@ -183,10 +229,10 @@ class TestExcelToODCSParser:
     def test_convert_value_types(self, parser):
         """Test value type conversion functionality."""
         # Test boolean conversion
-        assert parser._convert_value("true") == True
-        assert parser._convert_value("True") == True
-        assert parser._convert_value("FALSE") == False
-        assert parser._convert_value("false") == False
+        assert parser._convert_value("true")
+        assert parser._convert_value("True")
+        assert not parser._convert_value("FALSE")
+        assert not parser._convert_value("false")
 
         # Test integer conversion
         assert parser._convert_value("123") == 123
@@ -206,7 +252,7 @@ class TestExcelToODCSParser:
         assert parser._convert_value("   ") == ""  # Whitespace gets stripped to empty
 
         # Test existing types (should return as-is)
-        assert parser._convert_value(True) == True
+        assert parser._convert_value(True)
         assert parser._convert_value(42) == 42
         assert parser._convert_value(3.14) == 3.14
 
@@ -223,15 +269,15 @@ class TestExcelToODCSParser:
             "valid_dict": {
                 "nested_valid": "keep",
                 "nested_empty": "",
-                "nested_none": None
+                "nested_none": None,
             },
             "empty_list": [],
             "valid_list": ["keep1", "", None, "keep2"],
             "mixed_list": [
                 {"valid": "data", "empty": ""},
                 {"all_empty": "", "also_empty": None},
-                "string_item"
-            ]
+                "string_item",
+            ],
         }
 
         cleaned = parser._clean_data(dirty_data)
@@ -241,14 +287,9 @@ class TestExcelToODCSParser:
             "valid_number": 42,
             "zero_number": 0,
             "false_boolean": False,
-            "valid_dict": {
-                "nested_valid": "keep"
-            },
+            "valid_dict": {"nested_valid": "keep"},
             "valid_list": ["keep1", "keep2"],
-            "mixed_list": [
-                {"valid": "data"},
-                "string_item"
-            ]
+            "mixed_list": [{"valid": "data"}, "string_item"],
         }
 
         assert cleaned == expected
@@ -259,7 +300,7 @@ class TestExcelToODCSParser:
         parser.worksheets = {
             "Basic Information": pd.DataFrame(),
             "Tags": pd.DataFrame(),
-            "Empty Sheet": pd.DataFrame()
+            "Empty Sheet": pd.DataFrame(),
         }
 
         result = parser._parse_basic_information()
@@ -286,7 +327,7 @@ class TestExcelToODCSParser:
         assert parser._parse_authoritative_definitions() == {}
         assert parser._parse_custom_properties() == {}
 
-    @patch('pandas.read_excel')
+    @patch("pandas.read_excel")
     def test_load_worksheets_with_error(self, mock_read_excel, parser):
         """Test worksheet loading with pandas errors."""
         # Mock workbook
@@ -317,10 +358,10 @@ class TestExcelToODCSParser:
             "kind": "DataContract",
             "apiVersion": "v3.0.2",
             "id": "test-123",
-            "status": "active"
+            "status": "active",
         }
 
-        assert parser.validate_odcs_data(valid_data) == True
+        assert parser.validate_odcs_data(valid_data)
 
     def test_validate_odcs_data_invalid(self, parser):
         """Test ODCS validation with invalid data."""
@@ -329,27 +370,29 @@ class TestExcelToODCSParser:
             # Missing required fields
         }
 
-        assert parser.validate_odcs_data(invalid_data) == False
+        assert not parser.validate_odcs_data(invalid_data)
 
     def test_parse_servers_with_port_conversion(self, parser):
         """Test server parsing with port number conversion."""
         # Mock DataFrame with server data
-        servers_df = pd.DataFrame([
-            {
-                "Server": "db1",
-                "Type": "postgresql",
-                "Port": "5432",
-                "Host": "localhost",
-                "Database": "mydb"
-            },
-            {
-                "Server": "db2",
-                "Type": "mysql",
-                "Port": "invalid_port",  # Should not crash
-                "Host": "remote",
-                "Database": "otherdb"
-            }
-        ])
+        servers_df = pd.DataFrame(
+            [
+                {
+                    "Server": "db1",
+                    "Type": "postgresql",
+                    "Port": "5432",
+                    "Host": "localhost",
+                    "Database": "mydb",
+                },
+                {
+                    "Server": "db2",
+                    "Type": "mysql",
+                    "Port": "invalid_port",  # Should not crash
+                    "Host": "remote",
+                    "Database": "otherdb",
+                },
+            ]
+        )
 
         parser.worksheets = {"Servers": servers_df}
 
@@ -367,14 +410,16 @@ class TestExcelToODCSParser:
     def test_parse_custom_properties_with_type_conversion(self, parser):
         """Test custom properties parsing with automatic type conversion."""
         # Mock DataFrame with various value types
-        props_df = pd.DataFrame([
-            {"Property": "stringProp", "Value": "hello"},
-            {"Property": "intProp", "Value": "42"},
-            {"Property": "floatProp", "Value": "3.14"},
-            {"Property": "boolProp", "Value": "true"},
-            {"Property": "emptyProp", "Value": ""},
-            {"Property": "noneProp", "Value": None}
-        ])
+        props_df = pd.DataFrame(
+            [
+                {"Property": "stringProp", "Value": "hello"},
+                {"Property": "intProp", "Value": "42"},
+                {"Property": "floatProp", "Value": "3.14"},
+                {"Property": "boolProp", "Value": "true"},
+                {"Property": "emptyProp", "Value": ""},
+                {"Property": "noneProp", "Value": None},
+            ]
+        )
 
         parser.worksheets = {"Custom Properties": props_df}
 
@@ -397,7 +442,7 @@ class TestExcelToODCSParser:
         assert float_prop["value"] == 3.14
 
         bool_prop = next(p for p in props if p["property"] == "boolProp")
-        assert bool_prop["value"] == True
+        assert bool_prop["value"]
 
     def test_integration_with_generated_excel(self, parser):
         """Test parsing Excel file generated by ODCSToExcelConverter."""
@@ -412,13 +457,13 @@ class TestExcelToODCSParser:
             "tags": ["integration", "roundtrip"],
             "description": {
                 "usage": "Integration testing",
-                "purpose": "Verify roundtrip conversion"
-            }
+                "purpose": "Verify roundtrip conversion",
+            },
         }
 
         # Generate Excel file
         converter = ODCSToExcelConverter()
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as excel_file:
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as excel_file:
             excel_path = excel_file.name
 
         try:

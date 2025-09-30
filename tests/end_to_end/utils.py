@@ -1,20 +1,14 @@
 """Utilities for end-to-end tests."""
 
 import json
-import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Tuple
-from unittest.mock import MagicMock, patch
+from typing import Any, Dict, List, Optional, Tuple
 import pytest
-import shlex
-import os
 
-from odcs_converter.cli import main as cli_main
 from odcs_converter.generator import ODCSToExcelConverter
 from odcs_converter.excel_parser import ExcelToODCSParser
-from odcs_converter.yaml_converter import YAMLConverter
 
 
 class EndToEndTestHelper:

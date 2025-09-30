@@ -1,13 +1,10 @@
 """Example unit test demonstrating the new testing structure and utilities."""
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
 from odcs_converter.models import ODCSDataContract, Server, SchemaProperty
 from tests.unit.utils import (
-    UnitTestHelper,
-    MockFactory,
-    ValidationHelper,
     unit_test,
     parametrize_logical_types,
     parametrize_server_types,

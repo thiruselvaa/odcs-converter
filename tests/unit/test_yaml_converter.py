@@ -1,9 +1,7 @@
 """Unit tests for YAML conversion utilities."""
 
 import pytest
-import tempfile
 from pathlib import Path
-from typing import Dict, Any
 
 from odcs_converter.yaml_converter import YAMLConverter
 
@@ -14,11 +12,7 @@ class TestYAMLConverter:
 
     def test_dict_to_yaml_string_simple(self):
         """Test converting simple dictionary to YAML string."""
-        data = {
-            "name": "test",
-            "value": 42,
-            "active": True
-        }
+        data = {"name": "test", "value": 42, "active": True}
 
         yaml_string = YAMLConverter.dict_to_yaml_string(data)
 
@@ -29,13 +23,8 @@ class TestYAMLConverter:
     def test_dict_to_yaml_string_nested(self):
         """Test converting nested dictionary to YAML string."""
         data = {
-            "parent": {
-                "child1": "value1",
-                "child2": {
-                    "grandchild": "nested_value"
-                }
-            },
-            "list_field": ["item1", "item2", "item3"]
+            "parent": {"child1": "value1", "child2": {"grandchild": "nested_value"}},
+            "list_field": ["item1", "item2", "item3"],
         }
 
         yaml_string = YAMLConverter.dict_to_yaml_string(data)
@@ -51,7 +40,7 @@ class TestYAMLConverter:
         data = {
             "description": "This contains: special & characters",
             "path": "/home/user/file.txt",
-            "query": "SELECT * FROM table WHERE id = 'test'"
+            "query": "SELECT * FROM table WHERE id = 'test'",
         }
 
         yaml_string = YAMLConverter.dict_to_yaml_string(data)
@@ -71,11 +60,7 @@ class TestYAMLConverter:
 
     def test_dict_to_yaml_string_none_values(self):
         """Test YAML string generation with None values."""
-        data = {
-            "field1": "value1",
-            "field2": None,
-            "field3": "value3"
-        }
+        data = {"field1": "value1", "field2": None, "field3": "value3"}
 
         yaml_string = YAMLConverter.dict_to_yaml_string(data)
 
@@ -85,14 +70,12 @@ class TestYAMLConverter:
 
     def test_dict_to_yaml_string_invalid_data(self):
         """Test YAML string generation with invalid data."""
+
         # Test with non-serializable object - YAML converter handles this gracefully
         class NonSerializable:
             pass
 
-        data = {
-            "valid": "value",
-            "invalid": NonSerializable()
-        }
+        data = {"valid": "value", "invalid": NonSerializable()}
 
         # YAML converter should handle this without raising an exception
         result = YAMLConverter.dict_to_yaml_string(data)
@@ -159,11 +142,7 @@ class TestYAMLConverter:
 
     def test_dict_to_yaml_file(self, temp_dir):
         """Test converting dictionary to YAML file."""
-        data = {
-            "version": "1.0.0",
-            "name": "test_contract",
-            "tags": ["test", "unit"]
-        }
+        data = {"version": "1.0.0", "name": "test_contract", "tags": ["test", "unit"]}
 
         yaml_file = temp_dir / "test.yaml"
         YAMLConverter.dict_to_yaml(data, yaml_file)
@@ -171,7 +150,7 @@ class TestYAMLConverter:
         assert yaml_file.exists()
 
         # Verify file content
-        with open(yaml_file, 'r', encoding='utf-8') as f:
+        with open(yaml_file, "r", encoding="utf-8") as f:
             content = f.read()
 
         assert "version: 1.0.0" in content
@@ -219,7 +198,7 @@ class TestYAMLConverter:
         """
 
         yaml_file = temp_dir / "contract.yaml"
-        with open(yaml_file, 'w', encoding='utf-8') as f:
+        with open(yaml_file, "w", encoding="utf-8") as f:
             f.write(yaml_content)
 
         data = YAMLConverter.yaml_to_dict(yaml_file)
@@ -228,6 +207,7 @@ class TestYAMLConverter:
         assert data["kind"] == "DataContract"
         # YAML automatically parses dates, so check the parsed date
         from datetime import date
+
         assert data["metadata"]["created"] == date(2024, 1, 15)
         assert "production" in data["metadata"]["tags"]
 
@@ -241,7 +221,7 @@ class TestYAMLConverter:
     def test_yaml_to_dict_invalid_file_content(self, temp_dir):
         """Test handling of invalid YAML file content."""
         yaml_file = temp_dir / "invalid.yaml"
-        with open(yaml_file, 'w', encoding='utf-8') as f:
+        with open(yaml_file, "w", encoding="utf-8") as f:
             f.write("invalid: yaml: content: [\n  unclosed")
 
         with pytest.raises(ValueError, match="Invalid YAML format"):
@@ -250,7 +230,7 @@ class TestYAMLConverter:
     def test_yaml_to_dict_non_dict_file(self, temp_dir):
         """Test handling of YAML file with non-dict root."""
         yaml_file = temp_dir / "list.yaml"
-        with open(yaml_file, 'w', encoding='utf-8') as f:
+        with open(yaml_file, "w", encoding="utf-8") as f:
             f.write("- item1\n- item2\n- item3")
 
         with pytest.raises(ValueError, match="dictionary/object at root level"):
@@ -276,32 +256,44 @@ class TestYAMLConverter:
 
     def test_normalize_yaml_extension_prefer_yaml(self):
         """Test YAML extension normalization preferring .yaml."""
-        result = YAMLConverter.normalize_yaml_extension("contract.txt", prefer_yaml=True)
+        result = YAMLConverter.normalize_yaml_extension(
+            "contract.txt", prefer_yaml=True
+        )
         assert result == Path("contract.yaml")
 
         result = YAMLConverter.normalize_yaml_extension("contract", prefer_yaml=True)
         assert result == Path("contract.yaml")
 
         # Should preserve existing YAML extensions
-        result = YAMLConverter.normalize_yaml_extension("contract.yml", prefer_yaml=True)
+        result = YAMLConverter.normalize_yaml_extension(
+            "contract.yml", prefer_yaml=True
+        )
         assert result == Path("contract.yml")
 
-        result = YAMLConverter.normalize_yaml_extension("contract.yaml", prefer_yaml=True)
+        result = YAMLConverter.normalize_yaml_extension(
+            "contract.yaml", prefer_yaml=True
+        )
         assert result == Path("contract.yaml")
 
     def test_normalize_yaml_extension_prefer_yml(self):
         """Test YAML extension normalization preferring .yml."""
-        result = YAMLConverter.normalize_yaml_extension("contract.txt", prefer_yaml=False)
+        result = YAMLConverter.normalize_yaml_extension(
+            "contract.txt", prefer_yaml=False
+        )
         assert result == Path("contract.yml")
 
         result = YAMLConverter.normalize_yaml_extension("contract", prefer_yaml=False)
         assert result == Path("contract.yml")
 
         # Should preserve existing YAML extensions
-        result = YAMLConverter.normalize_yaml_extension("contract.yaml", prefer_yaml=False)
+        result = YAMLConverter.normalize_yaml_extension(
+            "contract.yaml", prefer_yaml=False
+        )
         assert result == Path("contract.yaml")
 
-        result = YAMLConverter.normalize_yaml_extension("contract.yml", prefer_yaml=False)
+        result = YAMLConverter.normalize_yaml_extension(
+            "contract.yml", prefer_yaml=False
+        )
         assert result == Path("contract.yml")
 
     def test_normalize_yaml_extension_with_path_objects(self):
@@ -321,9 +313,9 @@ class TestYAMLConverter:
                 "description": "Test contract",
                 "tags": ["test", "roundtrip"],
                 "active": True,
-                "count": 42
+                "count": 42,
             },
-            "nullable_field": None
+            "nullable_field": None,
         }
 
         # Convert to YAML string
@@ -335,9 +327,14 @@ class TestYAMLConverter:
         # Verify data integrity
         assert converted_data["version"] == original_data["version"]
         assert converted_data["kind"] == original_data["kind"]
-        assert converted_data["metadata"]["description"] == original_data["metadata"]["description"]
+        assert (
+            converted_data["metadata"]["description"]
+            == original_data["metadata"]["description"]
+        )
         assert converted_data["metadata"]["tags"] == original_data["metadata"]["tags"]
-        assert converted_data["metadata"]["active"] == original_data["metadata"]["active"]
+        assert (
+            converted_data["metadata"]["active"] == original_data["metadata"]["active"]
+        )
         assert converted_data["metadata"]["count"] == original_data["metadata"]["count"]
 
     def test_roundtrip_file_conversion(self, temp_dir):
@@ -348,8 +345,8 @@ class TestYAMLConverter:
                 "version": "2.1.0",
                 "servers": [
                     {"name": "server1", "type": "postgresql"},
-                    {"name": "server2", "type": "snowflake"}
-                ]
+                    {"name": "server2", "type": "snowflake"},
+                ],
             }
         }
 
@@ -370,7 +367,7 @@ class TestYAMLConverter:
             "description": "Contract with émojis 🚀 and spëcial chars: àáâãäåæçèé",
             "unicode_field": "Contains unicode: ñ, ü, ø, ß",
             "chinese": "测试数据",
-            "arabic": "بيانات الاختبار"
+            "arabic": "بيانات الاختبار",
         }
 
         # Test string conversion
@@ -387,17 +384,12 @@ class TestYAMLConverter:
         # Create a reasonably large nested structure
         large_data = {
             "metadata": {
-                f"item_{i}": {"id": f"item_{i}", "value": i * 2}
-                for i in range(100)
+                f"item_{i}": {"id": f"item_{i}", "value": i * 2} for i in range(100)
             }
         }
         large_data["nested"] = {
             "level1": {
-                "level2": {
-                    "level3": {
-                        "items": [f"item_{i}" for i in range(50)]
-                    }
-                }
+                "level2": {"level3": {"items": [f"item_{i}" for i in range(50)]}}
             }
         }
 
@@ -406,5 +398,7 @@ class TestYAMLConverter:
         converted_data = YAMLConverter.yaml_string_to_dict(yaml_string)
 
         assert len(converted_data["metadata"]) == 100
-        assert len(converted_data["nested"]["level1"]["level2"]["level3"]["items"]) == 50
+        assert (
+            len(converted_data["nested"]["level1"]["level2"]["level3"]["items"]) == 50
+        )
         assert converted_data["metadata"]["item_50"]["value"] == 100
