@@ -528,9 +528,9 @@ class TestCompleteODCSContract:
 
         assert contract.version == "1.0.0"
         assert contract.apiVersion == ApiVersionEnum.V3_0_2
-        assert len(contract.schema) == 1
+        assert len(contract.schema_) == 1
 
-        schema_obj = contract.schema[0]
+        schema_obj = contract.schema_[0]
         assert schema_obj.name == "users"
         assert len(schema_obj.properties) == 1
         assert len(schema_obj.quality) == 1

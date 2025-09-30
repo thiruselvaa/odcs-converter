@@ -2,9 +2,8 @@
 
 import json
 import tempfile
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from typer.testing import CliRunner
 
 from odcs_converter.cli import app, _detect_file_type, _format_file_size, _validate_url

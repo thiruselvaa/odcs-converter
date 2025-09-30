@@ -400,8 +400,8 @@ class TestEnhancedExcelConversion:
         assert contract.name == enhanced_odcs_contract["name"]
 
         # Verify schema validation
-        assert len(contract.schema) == 1
-        schema_obj = contract.schema[0]
+        assert len(contract.schema_) == 1
+        schema_obj = contract.schema_[0]
         assert schema_obj.name == "users"
         assert len(schema_obj.properties) > 0
 
@@ -472,7 +472,7 @@ class TestEnhancedExcelConversion:
         contract = ODCSDataContract(**parsed_data)
 
         # Verify logical type options are preserved
-        test_table = contract.schema[0]
+        test_table = contract.schema_[0]
 
         email_prop = next(p for p in test_table.properties if p.name == "email_field")
         assert email_prop.logicalTypeOptions is not None
@@ -557,7 +557,7 @@ class TestEnhancedExcelConversion:
         contract = ODCSDataContract(**parsed_data)
 
         # Verify quality rules are preserved
-        test_table = contract.schema[0]
+        test_table = contract.schema_[0]
 
         # Object-level quality rules
         assert len(test_table.quality) == 1

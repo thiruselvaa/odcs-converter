@@ -56,7 +56,7 @@ class TestODCSDataContract:
         assert contract.tenant == "test-tenant"
         assert len(contract.tags) == 3
         assert len(contract.servers) == 2
-        assert len(contract.schema) == 1
+        assert len(contract.schema_) == 1
         assert contract.description.usage is not None
 
     def test_missing_required_fields(self):
@@ -230,7 +230,7 @@ class TestServer:
             host="snowflake.example.com",
             port=443,
             database="PROD_DB",
-            schema="PUBLIC",
+            schema_="PUBLIC",
             project="my-project",
             catalog="my-catalog",
             format="parquet",
@@ -238,7 +238,7 @@ class TestServer:
 
         assert server.environment == "production"
         assert server.location == "https://account.snowflakecomputing.com"
-        assert server.schema == "PUBLIC"
+        assert server.schema_ == "PUBLIC"
 
 
 @pytest.mark.unit

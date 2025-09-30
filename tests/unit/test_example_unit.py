@@ -206,7 +206,7 @@ class TestModelEdgeCases:
 
         assert contract.tags == []
         assert contract.servers == []
-        assert contract.schema == []
+        assert contract.schema_ == []
 
     def test_none_values(self):
         """Test handling of None values for optional fields."""

@@ -2,7 +2,6 @@
 
 import json
 import tempfile
-import pytest
 from pathlib import Path
 from typer.testing import CliRunner
 
