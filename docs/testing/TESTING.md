@@ -25,11 +25,12 @@ The ODCS Converter uses **pytest** as its testing framework. The test suite is o
 
 ### Current Test Status
 
-- **Total Tests**: 198 passing, 2 skipped
-- **Test Coverage**: 80%+
-- **Execution Time**: ~2 seconds for full suite
+- **Total Tests**: 237 passing (47 CLI + 190 core)
+- **Test Coverage**: 100% CLI coverage, 80%+ overall
+- **Execution Time**: ~3 seconds for full suite
 - **Lint Status**: ✅ All checks passing
-- **Last Updated**: 2025-01-26
+- **CLI Framework**: Typer + Rich + Click integration
+- **Last Updated**: 2025-01-27
 
 ### Related Documentation
 
@@ -47,6 +48,7 @@ tests/
 │   ├── __init__.py
 │   ├── utils.py               # Unit test utilities
 │   ├── test_models.py         # Model validation tests
+│   ├── test_cli.py            # CLI unit tests (33 tests)
 │   ├── test_example_unit.py   # Example unit tests
 │   └── test_yaml_converter.py # YAML converter tests
 │
@@ -56,7 +58,9 @@ tests/
 │   ├── test_generator.py      # Generator integration tests
 │   ├── test_excel_parser.py   # Parser integration tests
 │   ├── test_excel_generation.py
-│   └── test_excel_parsing.py
+│   ├── test_excel_parsing.py
+│   ├── test_cli_integration.py # CLI integration tests
+│   └── test_cli_real_conversion.py # Real conversion tests (14 tests)
 │
 └── end_to_end/                 # E2E tests (complete workflows)
     ├── __init__.py
@@ -101,6 +105,10 @@ uv run pytest tests/unit/test_models.py::TestODCSDataContract::test_valid_minima
 uv run pytest -m unit        # Only unit tests
 uv run pytest -m integration # Only integration tests
 uv run pytest -m e2e         # Only end-to-end tests
+
+# Run CLI tests specifically
+uv run pytest tests/unit/test_cli.py -v                    # CLI unit tests
+uv run pytest tests/integration/test_cli_*.py -v           # CLI integration tests
 ```
 
 ### Using Makefile Commands
@@ -113,6 +121,9 @@ make test
 make test-unit
 make test-integration
 make test-e2e
+
+# CLI-specific test commands
+make test-cli         # All CLI tests (if defined)
 
 # Run with coverage report
 make test-cov

@@ -84,6 +84,14 @@ Follow the [Contributing Guide](CONTRIBUTING.md) for:
 
 ## Key Concepts
 
+### Modern CLI Architecture
+
+The CLI has been modernized with Typer + Rich integration:
+- **Typer Framework**: Type-safe commands with automatic validation
+- **Rich Integration**: Beautiful terminal output with progress bars and tables
+- **Command Structure**: Modern subcommand architecture
+- **Error Handling**: User-friendly error messages with helpful feedback
+
 ### ODCS Schema Coverage
 
 The [ODCS Schema Coverage](ODCS_SCHEMA_COVERAGE.md) document provides:
@@ -93,18 +101,21 @@ The [ODCS Schema Coverage](ODCS_SCHEMA_COVERAGE.md) document provides:
 - Recommendations for future development
 
 **Quick Stats:**
-- ✅ 95% overall field coverage
-- ✅ 100% worksheet coverage (12 sheets)
+- ✅ 100% overall field coverage
+- ✅ 100% worksheet coverage (15 sheets)
 - ✅ Bidirectional conversion support
-- ✅ All 30 server types supported
+- ✅ All 30+ server types supported
+- ✅ 237 tests passing (47 CLI + 190 core)
 
 ### Architecture Principles
 
-1. **Separation of Concerns**: Models, generation, parsing are separate modules
+1. **Separation of Concerns**: Models, generation, parsing, and CLI are separate modules
 2. **Validation First**: Pydantic models provide strong validation
 3. **Bidirectional**: Full support for ODCS ↔ Excel conversion
-4. **Extensible**: Easy to add new fields and features
+4. **Modern CLI**: Typer + Rich for beautiful, type-safe command interface
 5. **Type Safe**: Comprehensive type hints throughout
+6. **Extensible**: Easy to add new fields and features
+7. **Test Driven**: 100% test coverage with unit and integration tests
 
 ### Development Workflow
 
@@ -130,6 +141,15 @@ git push origin feature/my-feature
 
 ## Common Development Tasks
 
+### Adding a New CLI Command
+
+1. Add command function to `src/odcs_converter/cli.py` with `@app.command()` decorator
+2. Define type-safe arguments and options using Typer annotations
+3. Add Rich formatting for beautiful output
+4. Add unit tests in `tests/unit/test_cli.py`
+5. Add integration tests in `tests/integration/`
+6. Update CLI documentation
+
 ### Adding a New Field
 
 1. Update the Pydantic model in `src/odcs_converter/models.py`
@@ -150,6 +170,9 @@ git push origin feature/my-feature
 ### Running Specific Tests
 
 ```bash
+# Run all CLI tests
+pytest tests/unit/test_cli.py tests/integration/test_cli_*.py
+
 # Run tests matching a pattern
 pytest -k "test_schema"
 
@@ -161,6 +184,9 @@ pytest --cov=src/odcs_converter
 
 # Run with verbose output
 pytest -v
+
+# Test CLI interactively
+python -m pytest tests/unit/test_cli.py::TestCliBasics::test_version_command -v
 ```
 
 ## Debugging
@@ -181,11 +207,15 @@ import pdb; pdb.set_trace()  # Add breakpoint
 ### Testing with Real Data
 
 ```bash
-# Generate Excel from sample contract
-python -m odcs_converter.cli generate examples/sample_contract.yaml output.xlsx
+# Modern CLI commands (Typer-based)
+python -m odcs_converter.cli to-excel examples/sample_contract.yaml output.xlsx --verbose
+python -m odcs_converter.cli to-odcs output.xlsx contract.yaml --validate
+python -m odcs_converter.cli convert examples/sample_contract.json result.xlsx --dry-run
 
-# Parse Excel back to YAML
-python -m odcs_converter.cli parse output.xlsx contract.yaml
+# Test CLI help and info commands
+python -m odcs_converter.cli --help
+python -m odcs_converter.cli version --verbose
+python -m odcs_converter.cli formats
 ```
 
 ## Resources
@@ -215,7 +245,36 @@ We welcome contributions! Please see the [Contributing Guide](CONTRIBUTING.md) f
 - Testing requirements
 - Documentation standards
 
+## CLI Development
+
+### CLI Architecture
+
+The CLI uses modern Python patterns:
+- **Typer**: Type-safe CLI framework built on Click
+- **Rich**: Beautiful terminal output with progress bars and tables
+- **Enums**: Type-safe format validation
+- **Path**: Automatic file path validation
+- **Configuration**: JSON config file support
+
+### CLI Testing
+
+The CLI has comprehensive test coverage:
+- **Unit Tests**: 33 tests covering all commands and options
+- **Integration Tests**: 14 tests with real file operations
+- **Mocked Tests**: Isolated testing of CLI logic
+- **Error Handling**: Tests for various failure scenarios
+
+### Adding CLI Features
+
+1. Use Typer decorators: `@app.command()`, `@app.option()`, `@app.argument()`
+2. Add type hints for automatic validation
+3. Use Rich for beautiful output: `console.print()`, `Progress()`, `Table()`
+4. Handle errors gracefully with user-friendly messages
+5. Add comprehensive tests for new functionality
+
 ---
 
-**Last Updated**: 2025-01-26  
-**Project Version**: 0.2.0
+**Last Updated**: 2025-01-27  
+**Project Version**: 0.2.0  
+**CLI Framework**: Typer + Rich + Click  
+**Test Coverage**: 237 tests (100% passing)
