@@ -32,6 +32,7 @@ from rich import box
 from .generator import ODCSToExcelConverter
 from .excel_parser import ExcelToODCSParser
 from .yaml_converter import YAMLConverter
+from .template_generator import TemplateGenerator, TemplateType
 from .logging_config import (
     setup_logging,
     get_logger,
@@ -866,6 +867,161 @@ def show_formats(
     """📋 Show supported file formats and their descriptions."""
     _configure_logging(verbose, quiet, environment)
     _show_supported_formats()
+
+
+@app.command("generate-template")
+def generate_template(
+    output: Path = typer.Argument(
+        ...,
+        help="📁 Output path for the Excel template file",
+        exists=False,
+    ),
+    template_type: str = typer.Option(
+        "full",
+        "--type",
+        "-t",
+        help="📝 Template type: minimal (essential fields only), required (all required fields), full (all fields)",
+    ),
+    no_examples: bool = typer.Option(
+        False,
+        "--no-examples",
+        help="🚫 Don't include example values in the template",
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="🔍 Show detailed information"
+    ),
+    quiet: bool = typer.Option(
+        False, "--quiet", "-q", help="🔇 Suppress all output except errors"
+    ),
+    environment: Optional[str] = typer.Option(
+        None,
+        "--env",
+        "--environment",
+        help="🌍 Logging environment (local, dev, test, stage, prod)",
+    ),
+) -> None:
+    """📋 Generate sample Excel template for creating ODCS data contracts.
+
+    This command creates pre-formatted Excel templates with:
+    - Color-coded headers (RED = required, BLUE = optional)
+    - Example values and helpful descriptions
+    - Cell comments with field explanations
+    - Multiple worksheets for different contract sections
+
+    Template Types:
+
+    • minimal: Only the most essential required fields
+      - Basic Information (5 fields)
+      - Schema (2 fields)
+      - Schema Properties (3 fields)
+      Perfect for quick proof-of-concept contracts
+
+    • required: All required fields plus common optional fields
+      - Basic Information (7 fields)
+      - Servers (3 fields)
+      - Schema (4 fields)
+      - Schema Properties (5 fields)
+      Good for standard production contracts
+
+    • full: All available fields (required + optional)
+      - All 15 worksheet types
+      - Complete field coverage
+      - Maximum flexibility and detail
+      Best for comprehensive data contracts
+
+    Examples:
+
+      # Generate a minimal template
+      odcs-converter generate-template minimal_template.xlsx --type minimal
+
+      # Generate a full template with examples
+      odcs-converter generate-template full_template.xlsx --type full
+
+      # Generate required fields template without examples
+      odcs-converter generate-template template.xlsx --type required --no-examples
+    """
+    _configure_logging(verbose, quiet, environment)
+
+    with LogContext(operation="generate_template", template_type=template_type):
+        try:
+            # Validate template type
+            template_type_lower = template_type.lower()
+            if template_type_lower not in ["minimal", "required", "full"]:
+                console.print(
+                    f"[bold red]❌ Invalid template type: {template_type}[/bold red]"
+                )
+                console.print("[yellow]Valid types: minimal, required, full[/yellow]")
+                raise typer.Exit(1)
+
+            # Map string to enum
+            type_mapping = {
+                "minimal": TemplateType.MINIMAL,
+                "required": TemplateType.REQUIRED,
+                "full": TemplateType.FULL,
+            }
+            template_enum = type_mapping[template_type_lower]
+
+            # Show generation info
+            if not quiet:
+                console.print(
+                    f"\n[bold cyan]📋 Generating {template_type_lower} Excel template...[/bold cyan]\n"
+                )
+
+                info_table = Table(show_header=False, box=box.ROUNDED)
+                info_table.add_column("Field", style="cyan")
+                info_table.add_column("Value", style="white")
+
+                info_table.add_row("Template Type", template_type_lower.upper())
+                info_table.add_row(
+                    "Include Examples", "Yes" if not no_examples else "No"
+                )
+                info_table.add_row("Output File", str(output))
+
+                console.print(info_table)
+                console.print()
+
+            # Create template generator
+            generator = TemplateGenerator()
+
+            # Generate template with progress indicator
+            with console.status("[bold green]Creating template..."):
+                generator.generate_template(
+                    output_path=output,
+                    template_type=template_enum,
+                    include_examples=not no_examples,
+                )
+
+            if not quiet:
+                console.print(
+                    f"\n[bold green]✅ Template generated successfully![/bold green]"
+                )
+                console.print(f"[dim]📄 File: {output}[/dim]\n")
+
+                # Show next steps
+                next_steps = Panel(
+                    "[bold white]Next Steps:[/bold white]\n\n"
+                    f"1. Open the template: [cyan]{output}[/cyan]\n"
+                    "2. Read the [cyan]📖 Instructions[/cyan] sheet\n"
+                    "3. Fill in your data (replace example rows)\n"
+                    "4. [bold]RED headers[/bold] = REQUIRED fields\n"
+                    "5. [bold blue]BLUE headers[/bold blue] = OPTIONAL fields\n"
+                    f"6. Convert to ODCS: [cyan]odcs-converter excel-to-odcs {output}[/cyan]\n",
+                    title="🎯 How to Use This Template",
+                    border_style="green",
+                )
+                console.print(next_steps)
+
+            logger.info(
+                f"Template generated successfully",
+                template_type=template_type_lower,
+                output=str(output),
+                include_examples=not no_examples,
+            )
+
+        except Exception as e:
+            logger.error(f"Failed to generate template: {e}")
+            console.print(f"\n[bold red]❌ Error: {e}[/bold red]\n")
+            raise typer.Exit(1)
 
 
 def main() -> None:
