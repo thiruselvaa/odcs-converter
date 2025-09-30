@@ -4,7 +4,14 @@ from datetime import datetime
 from typing import Any, List, Optional, Union
 from enum import Enum
 
-from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_validator,
+    model_validator,
+)
 from typing import Dict
 
 
@@ -346,6 +353,8 @@ class SchemaObject(BaseModel):
 class Server(BaseModel):
     """Server definition."""
 
+    model_config = ConfigDict(populate_by_name=True)
+
     server: str = Field(..., description="Server identifier")
     type: ServerTypeEnum = Field(..., description="Server type")
     description: Optional[str] = Field(None, description="Server description")
@@ -360,7 +369,7 @@ class Server(BaseModel):
     host: Optional[str] = Field(None, description="Server host")
     port: Optional[int] = Field(None, description="Server port")
     database: Optional[str] = Field(None, description="Database name")
-    schema: Optional[str] = Field(None, description="Schema name")
+    schema_: Optional[str] = Field(None, alias="schema", description="Schema name")
     project: Optional[str] = Field(None, description="Project name")
     catalog: Optional[str] = Field(None, description="Catalog name")
     format: Optional[str] = Field(None, description="Data format")
@@ -413,7 +422,9 @@ class ODCSDataContract(BaseModel):
     dataProduct: Optional[str] = Field(None, description="Data product name")
     description: Optional[Description] = Field(None, description="Dataset description")
     domain: Optional[str] = Field(None, description="Logical data domain")
-    schema: Optional[List[SchemaObject]] = Field(None, description="Schema objects")
+    schema_: Optional[List[SchemaObject]] = Field(
+        None, alias="schema", description="Schema objects"
+    )
     support: Optional[List[SupportItem]] = Field(None, description="Support channels")
     price: Optional[Pricing] = Field(None, description="Pricing information")
     team: Optional[List[Team]] = Field(None, description="Team members")
@@ -440,12 +451,12 @@ class ODCSDataContract(BaseModel):
             raise ValueError("Field cannot be empty or whitespace")
         return v
 
-    class Config:
-        """Pydantic configuration."""
-
-        use_enum_values = True
-        validate_assignment = True
-        extra = "forbid"
+    model_config = ConfigDict(
+        use_enum_values=True,
+        validate_assignment=True,
+        extra="forbid",
+        populate_by_name=True,
+    )
 
 
 # Update forward references for circular dependencies
