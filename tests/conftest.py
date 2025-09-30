@@ -14,25 +14,62 @@ from odcs_converter.excel_parser import ExcelToODCSParser
 from odcs_converter.yaml_converter import YAMLConverter
 
 # Import fixtures from utility modules to make them globally available
+# These are re-exported to be available as pytest fixtures across all test modules
+__all__ = [
+    "unit_test_helper",
+    "mock_factory",
+    "validation_helper",
+    "file_helper",
+    "parameterized_test_data",
+    "integration_test_helper",
+    "excel_test_helper",
+    "conversion_test_helper",
+    "component_test_helper",
+    "workflow_test_helper",
+    "complete_odcs_data",
+    "multi_table_odcs_data",
+    "e2e_test_helper",
+    "cli_test_helper",
+    "performance_test_helper",
+    "scenario_test_helper",
+    "error_scenario_test_helper",
+    "production_like_odcs",
+    "complex_multi_domain_odcs",
+]
+
 try:
-    from tests.unit.utils import (
-        unit_test_helper, mock_factory, validation_helper, file_helper, parameterized_test_data
+    from tests.unit.utils import (  # noqa: F401
+        unit_test_helper,
+        mock_factory,
+        validation_helper,
+        file_helper,
+        parameterized_test_data,
     )
 except ImportError:
     pass
 
 try:
-    from tests.integration.utils import (
-        integration_test_helper, excel_test_helper, conversion_test_helper,
-        component_test_helper, workflow_test_helper, complete_odcs_data, multi_table_odcs_data
+    from tests.integration.utils import (  # noqa: F401
+        integration_test_helper,
+        excel_test_helper,
+        conversion_test_helper,
+        component_test_helper,
+        workflow_test_helper,
+        complete_odcs_data,
+        multi_table_odcs_data,
     )
 except ImportError:
     pass
 
 try:
-    from tests.end_to_end.utils import (
-        e2e_test_helper, cli_test_helper, performance_test_helper,
-        scenario_test_helper, error_scenario_test_helper, production_like_odcs, complex_multi_domain_odcs
+    from tests.end_to_end.utils import (  # noqa: F401
+        e2e_test_helper,
+        cli_test_helper,
+        performance_test_helper,
+        scenario_test_helper,
+        error_scenario_test_helper,
+        production_like_odcs,
+        complex_multi_domain_odcs,
     )
 except ImportError:
     pass
@@ -45,7 +82,11 @@ FIXTURES_DIR = TESTS_DIR / "fixtures"
 OUTPUTS_DIR = TESTS_DIR / "outputs"
 
 # Ensure output directories exist
-for output_dir in [OUTPUTS_DIR / "unit", OUTPUTS_DIR / "integration", OUTPUTS_DIR / "end_to_end"]:
+for output_dir in [
+    OUTPUTS_DIR / "unit",
+    OUTPUTS_DIR / "integration",
+    OUTPUTS_DIR / "end_to_end",
+]:
     output_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -82,7 +123,7 @@ def sample_odcs_minimal() -> Dict[str, Any]:
         "kind": "DataContract",
         "apiVersion": "v3.0.2",
         "id": "test-contract-minimal",
-        "status": "active"
+        "status": "active",
     }
 
 
@@ -104,7 +145,7 @@ def sample_odcs_complete() -> Dict[str, Any]:
         "description": {
             "usage": "Complete test contract for comprehensive testing",
             "purpose": "Testing all ODCS fields and conversion scenarios",
-            "limitations": "Test environment only - not for production use"
+            "limitations": "Test environment only - not for production use",
         },
         "servers": [
             {
@@ -115,7 +156,7 @@ def sample_odcs_complete() -> Dict[str, Any]:
                 "host": "test-db.example.com",
                 "port": 5432,
                 "database": "test_db",
-                "schema": "public"
+                "schema": "public",
             },
             {
                 "server": "test-warehouse",
@@ -125,8 +166,8 @@ def sample_odcs_complete() -> Dict[str, Any]:
                 "account": "test-account",
                 "database": "TEST_DW",
                 "schema": "ANALYTICS",
-                "warehouse": "TEST_WH"
-            }
+                "warehouse": "TEST_WH",
+            },
         ],
         "schema": [
             {
@@ -144,23 +185,23 @@ def sample_odcs_complete() -> Dict[str, Any]:
                         "description": "Unique identifier",
                         "required": True,
                         "primaryKey": True,
-                        "primaryKeyPosition": 1
+                        "primaryKeyPosition": 1,
                     },
                     {
                         "name": "name",
                         "logicalType": "string",
                         "physicalType": "VARCHAR(255)",
                         "description": "Entity name",
-                        "required": True
+                        "required": True,
                     },
                     {
                         "name": "created_at",
                         "logicalType": "date",
                         "physicalType": "TIMESTAMP",
                         "description": "Creation timestamp",
-                        "required": True
-                    }
-                ]
+                        "required": True,
+                    },
+                ],
             }
         ],
         "support": [
@@ -169,7 +210,7 @@ def sample_odcs_complete() -> Dict[str, Any]:
                 "url": "https://support.example.com/test",
                 "description": "Test support channel",
                 "tool": "web",
-                "scope": "issues"
+                "scope": "issues",
             }
         ],
         "team": [
@@ -177,14 +218,14 @@ def sample_odcs_complete() -> Dict[str, Any]:
                 "username": "test.user@example.com",
                 "name": "Test User",
                 "role": "owner",
-                "description": "Test contract owner"
+                "description": "Test contract owner",
             }
         ],
         "roles": [
             {
                 "role": "test_reader",
                 "description": "Read-only access to test data",
-                "access": "SELECT"
+                "access": "SELECT",
             }
         ],
         "slaProperties": [
@@ -192,25 +233,19 @@ def sample_odcs_complete() -> Dict[str, Any]:
                 "property": "availability",
                 "value": 99.5,
                 "unit": "percent",
-                "driver": "operational"
+                "driver": "operational",
             }
         ],
         "authoritativeDefinitions": [
             {
                 "url": "https://docs.example.com/test-contract",
-                "type": "businessDefinition"
+                "type": "businessDefinition",
             }
         ],
         "customProperties": [
-            {
-                "property": "testEnvironment",
-                "value": "integration"
-            },
-            {
-                "property": "autoCleanup",
-                "value": True
-            }
-        ]
+            {"property": "testEnvironment", "value": "integration"},
+            {"property": "autoCleanup", "value": True},
+        ],
     }
 
 
@@ -240,7 +275,7 @@ def sample_excel_workbook() -> Generator[str, None, None]:
         ["kind", "DataContract", "Contract Kind"],
         ["apiVersion", "v3.0.2", "API Version"],
         ["id", "test-workbook-001", "Unique ID"],
-        ["status", "active", "Status"]
+        ["status", "active", "Status"],
     ]
     for row in basic_data:
         basic_sheet.append(row)
@@ -256,13 +291,13 @@ def sample_excel_workbook() -> Generator[str, None, None]:
     desc_data = [
         ["Field", "Value"],
         ["usage", "Sample workbook for testing"],
-        ["purpose", "Automated test validation"]
+        ["purpose", "Automated test validation"],
     ]
     for row in desc_data:
         desc_sheet.append(row)
 
     # Save to temporary file
-    with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp_file:
         wb.save(tmp_file.name)
         tmp_path = tmp_file.name
 
@@ -275,12 +310,14 @@ def sample_excel_workbook() -> Generator[str, None, None]:
 @pytest.fixture
 def mock_requests_get():
     """Mock requests.get for testing URL fetching."""
+
     def _mock_get(url: str, response_data: Dict[str, Any], status_code: int = 200):
         mock = MagicMock()
         mock.json.return_value = response_data
         mock.raise_for_status.return_value = None
         mock.status_code = status_code
         return mock
+
     return _mock_get
 
 
@@ -290,7 +327,11 @@ def cleanup_test_outputs():
     yield  # Run the test
 
     # Cleanup outputs after test
-    for output_dir in [OUTPUTS_DIR / "unit", OUTPUTS_DIR / "integration", OUTPUTS_DIR / "end_to_end"]:
+    for output_dir in [
+        OUTPUTS_DIR / "unit",
+        OUTPUTS_DIR / "integration",
+        OUTPUTS_DIR / "end_to_end",
+    ]:
         if output_dir.exists():
             for file in output_dir.glob("test_*"):
                 try:
@@ -302,32 +343,38 @@ def cleanup_test_outputs():
 @pytest.fixture
 def json_file_factory(temp_dir):
     """Factory to create temporary JSON files for testing."""
+
     def _create_json_file(data: Dict[str, Any], filename: str = "test.json") -> Path:
         file_path = temp_dir / filename
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
         return file_path
+
     return _create_json_file
 
 
 @pytest.fixture
 def yaml_file_factory(temp_dir):
     """Factory to create temporary YAML files for testing."""
+
     def _create_yaml_file(data: Dict[str, Any], filename: str = "test.yaml") -> Path:
         file_path = temp_dir / filename
         YAMLConverter.dict_to_yaml(data, file_path)
         return file_path
+
     return _create_yaml_file
 
 
 @pytest.fixture
 def excel_file_factory(temp_dir):
     """Factory to create temporary Excel files for testing."""
+
     def _create_excel_file(data: Dict[str, Any], filename: str = "test.xlsx") -> Path:
         file_path = temp_dir / filename
         converter = ODCSToExcelConverter()
         converter.generate_from_dict(data, file_path)
         return file_path
+
     return _create_excel_file
 
 
@@ -338,14 +385,13 @@ def pytest_configure(config):
         "markers", "unit: marks tests as unit tests (fast, isolated)"
     )
     config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests (medium speed, component interaction)"
+        "markers",
+        "integration: marks tests as integration tests (medium speed, component interaction)",
     )
     config.addinivalue_line(
         "markers", "e2e: marks tests as end-to-end tests (slower, full workflow)"
     )
-    config.addinivalue_line(
-        "markers", "slow: marks tests as slow running"
-    )
+    config.addinivalue_line("markers", "slow: marks tests as slow running")
 
 
 # Custom test result handling
@@ -370,7 +416,7 @@ class TestFileManager:
         """Create a test file with given content."""
         directory.mkdir(parents=True, exist_ok=True)
         file_path = directory / filename
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
         return file_path
 

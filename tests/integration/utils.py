@@ -4,9 +4,8 @@ import json
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional, Tuple
-from unittest.mock import MagicMock, patch
 import pytest
-from openpyxl import Workbook, load_workbook
+from openpyxl import load_workbook
 
 from odcs_converter.generator import ODCSToExcelConverter
 from odcs_converter.excel_parser import ExcelToODCSParser
@@ -34,7 +33,7 @@ class IntegrationTestHelper:
             "description": {
                 "usage": "Complete integration test contract",
                 "purpose": "Testing component interactions",
-                "limitations": "Integration test environment only"
+                "limitations": "Integration test environment only",
             },
             "servers": [
                 {
@@ -45,7 +44,7 @@ class IntegrationTestHelper:
                     "host": "integration-db.example.com",
                     "port": 5432,
                     "database": "integration_db",
-                    "schema": "public"
+                    "schema": "public",
                 }
             ],
             "schema": [
@@ -64,30 +63,30 @@ class IntegrationTestHelper:
                             "description": "Unique identifier",
                             "required": True,
                             "primaryKey": True,
-                            "primaryKeyPosition": 1
+                            "primaryKeyPosition": 1,
                         },
                         {
                             "name": "name",
                             "logicalType": "string",
                             "physicalType": "VARCHAR(255)",
                             "description": "Entity name",
-                            "required": True
+                            "required": True,
                         },
                         {
                             "name": "created_at",
                             "logicalType": "timestamp",
                             "physicalType": "TIMESTAMP",
                             "description": "Creation timestamp",
-                            "required": True
+                            "required": True,
                         },
                         {
                             "name": "active",
                             "logicalType": "boolean",
                             "physicalType": "BOOLEAN",
                             "description": "Active status",
-                            "required": False
-                        }
-                    ]
+                            "required": False,
+                        },
+                    ],
                 }
             ],
             "support": [
@@ -96,7 +95,7 @@ class IntegrationTestHelper:
                     "url": "https://support.example.com/integration",
                     "description": "Integration support channel",
                     "tool": "web",
-                    "scope": "issues"
+                    "scope": "issues",
                 }
             ],
             "team": [
@@ -104,22 +103,19 @@ class IntegrationTestHelper:
                     "username": "integration.user@example.com",
                     "name": "Integration User",
                     "role": "owner",
-                    "description": "Integration test owner"
+                    "description": "Integration test owner",
                 }
             ],
             "roles": [
                 {
                     "role": "integration_reader",
                     "description": "Read-only access to integration data",
-                    "access": "SELECT"
+                    "access": "SELECT",
                 }
             ],
             "customProperties": [
-                {
-                    "property": "integrationEnvironment",
-                    "value": "testing"
-                }
-            ]
+                {"property": "integrationEnvironment", "value": "testing"}
+            ],
         }
 
     @staticmethod
@@ -141,16 +137,16 @@ class IntegrationTestHelper:
                         "description": "User ID",
                         "required": True,
                         "primaryKey": True,
-                        "primaryKeyPosition": 1
+                        "primaryKeyPosition": 1,
                     },
                     {
                         "name": "email",
                         "logicalType": "string",
                         "physicalType": "VARCHAR(255)",
                         "description": "User email",
-                        "required": True
-                    }
-                ]
+                        "required": True,
+                    },
+                ],
             },
             {
                 "name": "orders",
@@ -165,24 +161,24 @@ class IntegrationTestHelper:
                         "description": "Order ID",
                         "required": True,
                         "primaryKey": True,
-                        "primaryKeyPosition": 1
+                        "primaryKeyPosition": 1,
                     },
                     {
                         "name": "user_id",
                         "logicalType": "integer",
                         "physicalType": "BIGINT",
                         "description": "User ID (FK)",
-                        "required": True
+                        "required": True,
                     },
                     {
                         "name": "amount",
                         "logicalType": "number",
                         "physicalType": "DECIMAL(10,2)",
                         "description": "Order amount",
-                        "required": True
-                    }
-                ]
-            }
+                        "required": True,
+                    },
+                ],
+            },
         ]
         return base
 
@@ -191,9 +187,11 @@ class ExcelTestHelper:
     """Helper for Excel-related integration tests."""
 
     @staticmethod
-    def create_sample_excel_workbook(odcs_data: Dict[str, Any]) -> Generator[Path, None, None]:
+    def create_sample_excel_workbook(
+        odcs_data: Dict[str, Any],
+    ) -> Generator[Path, None, None]:
         """Create Excel workbook from ODCS data for testing."""
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp_file:
             temp_path = Path(tmp_file.name)
 
         converter = ODCSToExcelConverter()
@@ -236,7 +234,7 @@ class ExcelTestHelper:
     @staticmethod
     def create_invalid_excel_file() -> Generator[Path, None, None]:
         """Create an invalid Excel file for error testing."""
-        with tempfile.NamedTemporaryFile(suffix='.xlsx', delete=False) as tmp_file:
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp_file:
             # Write invalid content
             tmp_file.write(b"This is not a valid Excel file")
             temp_path = Path(tmp_file.name)
@@ -252,8 +250,7 @@ class ConversionTestHelper:
 
     @staticmethod
     def test_roundtrip_conversion(
-        odcs_data: Dict[str, Any],
-        temp_dir: Path
+        odcs_data: Dict[str, Any], temp_dir: Path
     ) -> Tuple[bool, Optional[str]]:
         """Test roundtrip conversion: ODCS -> Excel -> ODCS."""
         try:
@@ -273,7 +270,10 @@ class ConversionTestHelper:
             key_fields = ["version", "kind", "apiVersion", "id", "status"]
             for field in key_fields:
                 if odcs_data.get(field) != converted_data.get(field):
-                    return False, f"Field '{field}' mismatch: {odcs_data.get(field)} != {converted_data.get(field)}"
+                    return (
+                        False,
+                        f"Field '{field}' mismatch: {odcs_data.get(field)} != {converted_data.get(field)}",
+                    )
 
             return True, None
 
@@ -284,15 +284,17 @@ class ConversionTestHelper:
     def compare_odcs_structures(
         original: Dict[str, Any],
         converted: Dict[str, Any],
-        ignore_fields: Optional[List[str]] = None
+        ignore_fields: Optional[List[str]] = None,
     ) -> Tuple[bool, List[str]]:
         """Compare two ODCS structures and return differences."""
         ignore_fields = ignore_fields or []
         differences = []
 
         def _compare_recursive(obj1, obj2, path=""):
-            if type(obj1) != type(obj2):
-                differences.append(f"{path}: type mismatch {type(obj1)} != {type(obj2)}")
+            if type(obj1) is not type(obj2):
+                differences.append(
+                    f"{path}: type mismatch {type(obj1)} != {type(obj2)}"
+                )
                 return
 
             if isinstance(obj1, dict):
@@ -311,7 +313,9 @@ class ConversionTestHelper:
 
             elif isinstance(obj1, list):
                 if len(obj1) != len(obj2):
-                    differences.append(f"{path}: length mismatch {len(obj1)} != {len(obj2)}")
+                    differences.append(
+                        f"{path}: length mismatch {len(obj1)} != {len(obj2)}"
+                    )
                     return
 
                 for i, (item1, item2) in enumerate(zip(obj1, obj2)):
@@ -330,8 +334,7 @@ class ComponentTestHelper:
 
     @staticmethod
     def test_yaml_excel_integration(
-        yaml_data: Dict[str, Any],
-        temp_dir: Path
+        yaml_data: Dict[str, Any], temp_dir: Path
     ) -> Tuple[bool, Optional[str]]:
         """Test YAML -> ODCS -> Excel integration."""
         try:
@@ -352,7 +355,7 @@ class ComponentTestHelper:
 
             # Step 4: Parse Excel back to verify structure
             parser = ExcelToODCSParser()
-            parsed_data = parser.parse_from_file(excel_path)
+            parser.parse_from_file(excel_path)
 
             return True, None
 
@@ -360,10 +363,7 @@ class ComponentTestHelper:
             return False, str(e)
 
     @staticmethod
-    def test_error_handling_chain(
-        invalid_data: Any,
-        temp_dir: Path
-    ) -> List[str]:
+    def test_error_handling_chain(invalid_data: Any, temp_dir: Path) -> List[str]:
         """Test error handling across components."""
         errors_found = []
 
@@ -390,9 +390,7 @@ class WorkflowTestHelper:
 
     @staticmethod
     def simulate_user_workflow(
-        input_data: Dict[str, Any],
-        workflow_type: str,
-        temp_dir: Path
+        input_data: Dict[str, Any], workflow_type: str, temp_dir: Path
     ) -> Tuple[bool, Dict[str, Any], List[str]]:
         """Simulate complete user workflow."""
         results = {"files_created": [], "conversions_completed": []}
@@ -421,15 +419,19 @@ class WorkflowTestHelper:
 
                 # Save as JSON
                 json_path = temp_dir / "user_output.json"
-                with open(json_path, 'w') as f:
+                with open(json_path, "w") as f:
                     json.dump(parsed_data, f, indent=2)
 
                 results["files_created"].extend([str(excel_path), str(json_path)])
-                results["conversions_completed"].extend(["ODCS -> Excel", "Excel -> ODCS"])
+                results["conversions_completed"].extend(
+                    ["ODCS -> Excel", "Excel -> ODCS"]
+                )
 
             elif workflow_type == "roundtrip":
                 # Simulate: User tests roundtrip conversion
-                success, error = ConversionTestHelper.test_roundtrip_conversion(input_data, temp_dir)
+                success, error = ConversionTestHelper.test_roundtrip_conversion(
+                    input_data, temp_dir
+                )
                 if not success:
                     errors.append(f"Roundtrip failed: {error}")
                 else:
@@ -498,7 +500,9 @@ def slow_integration_test(func):
 
 def requires_temp_files(func):
     """Decorator for tests that require temporary file management."""
+
     def wrapper(*args, **kwargs):
         # This decorator can be extended to handle specific temp file requirements
         return func(*args, **kwargs)
+
     return wrapper
