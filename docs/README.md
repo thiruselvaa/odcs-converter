@@ -4,50 +4,68 @@ Welcome to the ODCS Converter documentation! This directory contains comprehensi
 
 ## 📚 Documentation Structure
 
-### Development Documentation
+### 📖 User Documentation
+Guides for end users of the ODCS Converter.
+
+- **[User Guide](user/USER_GUIDE.md)** - How to use the ODCS Converter *(coming soon)*
+- **[CLI Reference](user/CLI.md)** - Command-line interface documentation *(coming soon)*
+- **[Examples](user/EXAMPLES.md)** - Usage examples and tutorials *(coming soon)*
+- **[User README](user/README.md)** - User documentation index
+
+For now, see the [Main README](../README.md) for quick start and basic usage.
+
+### 👨‍💻 Development Documentation
 Documentation for developers working on the project.
 
 - **[Setup Guide](development/SETUP.md)** - Environment setup and installation instructions
 - **[Contributing Guide](development/CONTRIBUTING.md)** - How to contribute to the project
-- **[Architecture Overview](development/ARCHITECTURE.md)** - System design and architecture
-- **[API Reference](development/API.md)** - Detailed API documentation
+- **[Project Structure](development/PROJECT_STRUCTURE.md)** - Codebase organization
+- **[Architecture Overview](development/ARCHITECTURE.md)** - System design *(coming soon)*
+- **[API Reference](development/API.md)** - Detailed API documentation *(coming soon)*
 
-### Testing Documentation
+### 🧪 Testing Documentation
 Everything related to testing the project.
 
-- **[Test Fixes Summary](testing/TEST_FIXES_SUMMARY.md)** - Recent test improvements and fixes
 - **[Testing Guide](testing/TESTING.md)** - How to write and run tests
-- **[Test Coverage Report](testing/COVERAGE.md)** - Current test coverage status
+- **[Test Fixes Summary](testing/TEST_FIXES_SUMMARY.md)** - Recent test improvements
+- **[Test Coverage Report](testing/COVERAGE.md)** - Coverage reports *(coming soon)*
 
-### Deployment Documentation
+### 🚀 Deployment Documentation
 Guides for deploying and using the project.
 
-- **[Deployment Guide](deployment/DEPLOYMENT.md)** - How to deploy the application
-- **[Docker Guide](deployment/DOCKER.md)** - Using Docker for deployment
-- **[Configuration Guide](deployment/CONFIGURATION.md)** - Configuration options
+- **[Deployment README](deployment/README.md)** - Deployment documentation index
+- **[Deployment Guide](deployment/DEPLOYMENT.md)** - Production deployment *(coming soon)*
+- **[Docker Guide](deployment/DOCKER.md)** - Docker containerization *(coming soon)*
+- **[Configuration Guide](deployment/CONFIGURATION.md)** - Configuration options *(coming soon)*
 
-### User Documentation
-Guides for end users of the ODCS Converter.
+### 📋 Project Management
+Project organization, changes, and historical documentation.
 
-- **[User Guide](user/USER_GUIDE.md)** - How to use the ODCS Converter
-- **[CLI Reference](user/CLI.md)** - Command-line interface documentation
-- **[Examples](user/EXAMPLES.md)** - Usage examples and tutorials
+- **[Project Management README](project-management/README.md)** - Management docs index
+- **[Organization Summary](project-management/ORGANIZATION_SUMMARY.md)** - Project organization details
+- **[Rename Summary](project-management/RENAME_SUMMARY.md)** - Project rename documentation
+- **[Changelog](project-management/CHANGELOG.md)** - Version history *(coming soon)*
 
 ## 🚀 Quick Links
+
+### For New Users
+1. Start with the [Main README](../README.md) - Quick start guide
+2. See [User Documentation](user/README.md) - User guides *(in progress)*
+3. Check [Examples](../examples/) - Example files and usage
 
 ### For New Contributors
 1. Read the [Setup Guide](development/SETUP.md)
 2. Check the [Contributing Guide](development/CONTRIBUTING.md)
-3. Review the [Architecture Overview](development/ARCHITECTURE.md)
+3. Review the [Project Structure](development/PROJECT_STRUCTURE.md)
 4. Run tests using the [Testing Guide](testing/TESTING.md)
-
-### For Users
-1. See the [User Guide](user/USER_GUIDE.md)
-2. Check out [Examples](user/EXAMPLES.md)
-3. Reference the [CLI Guide](user/CLI.md)
 
 ### For Maintainers
 1. Review [Test Fixes Summary](testing/TEST_FIXES_SUMMARY.md)
+</text>
+
+<old_text line=54>
+2. Check [Deployment Guide](deployment/DEPLOYMENT.md)
+3. Monitor [Test Coverage](testing/COVERAGE.md)
 2. Check [Deployment Guide](deployment/DEPLOYMENT.md)
 3. Monitor [Test Coverage](testing/COVERAGE.md)
 
@@ -55,15 +73,15 @@ Guides for end users of the ODCS Converter.
 
 - **[README.md](../README.md)** - Main project README
 - **[LICENSE](../LICENSE)** - Project license
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
+- **[CHANGELOG.md](project-management/CHANGELOG.md)** - Version history *(coming soon)*
 
 ## 🔧 Additional Resources
 
 ### Scripts
-Utility scripts are located in the `scripts/` directory at the project root:
+Utility scripts are located in the [`scripts/`](../scripts/) directory:
+- **[Scripts README](../scripts/README.md)** - Scripts documentation
 - `setup_tests.py` - Initialize test directory structure
-- `run_checks.py` - Run code quality checks
-- `generate_docs.py` - Generate API documentation
+- `run_checks.sh` - Run code quality checks
 
 ### Configuration Files
 - `pyproject.toml` - Project configuration and dependencies

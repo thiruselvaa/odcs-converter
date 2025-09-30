@@ -209,26 +209,34 @@ Thanks to **uv**, this tool is exceptionally fast:
 Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 ### For Users
-- **[User Guide](docs/user/USER_GUIDE.md)** - Complete usage instructions
-- **[CLI Reference](docs/user/CLI.md)** - Command-line interface documentation
-- **[Examples](docs/user/EXAMPLES.md)** - Code examples and tutorials
+- **[User Guide](docs/user/USER_GUIDE.md)** - Complete usage instructions *(coming soon)*
+- **[CLI Reference](docs/user/CLI.md)** - Command-line interface documentation *(coming soon)*
+- **[Examples](docs/user/EXAMPLES.md)** - Code examples and tutorials *(coming soon)*
+- **[User README](docs/user/README.md)** - User documentation index
 
 ### For Developers
 - **[Setup Guide](docs/development/SETUP.md)** - Development environment setup
 - **[Contributing Guide](docs/development/CONTRIBUTING.md)** - How to contribute
-- **[Architecture](docs/development/ARCHITECTURE.md)** - System design overview
-- **[API Reference](docs/development/API.md)** - Detailed API documentation
 - **[Project Structure](docs/development/PROJECT_STRUCTURE.md)** - Codebase organization
+- **[Architecture](docs/development/ARCHITECTURE.md)** - System design overview *(coming soon)*
+- **[API Reference](docs/development/API.md)** - Detailed API documentation *(coming soon)*
 
 ### For Testing
 - **[Testing Guide](docs/testing/TESTING.md)** - How to write and run tests
 - **[Test Fixes Summary](docs/testing/TEST_FIXES_SUMMARY.md)** - Recent test improvements
-- **[Coverage Report](docs/testing/COVERAGE.md)** - Current test coverage
+- **[Coverage Report](docs/testing/COVERAGE.md)** - Current test coverage *(coming soon)*
 
 ### For Deployment
-- **[Deployment Guide](docs/deployment/DEPLOYMENT.md)** - How to deploy
-- **[Docker Guide](docs/deployment/DOCKER.md)** - Container usage
-- **[Configuration](docs/deployment/CONFIGURATION.md)** - Configuration options
+- **[Deployment README](docs/deployment/README.md)** - Deployment documentation index
+- **[Deployment Guide](docs/deployment/DEPLOYMENT.md)** - How to deploy *(coming soon)*
+- **[Docker Guide](docs/deployment/DOCKER.md)** - Container usage *(coming soon)*
+- **[Configuration](docs/deployment/CONFIGURATION.md)** - Configuration options *(coming soon)*
+
+### Project Management
+- **[Project Management README](docs/project-management/README.md)** - Management docs index
+- **[Organization Summary](docs/project-management/ORGANIZATION_SUMMARY.md)** - Project organization
+- **[Rename Summary](docs/project-management/RENAME_SUMMARY.md)** - Project rename details
+- **[Changelog](docs/project-management/CHANGELOG.md)** - Version history *(coming soon)*
 
 ### Utility Scripts
 - **[Scripts Documentation](scripts/README.md)** - Available utility scripts
