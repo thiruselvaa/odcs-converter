@@ -22,7 +22,7 @@ from odcs_converter.models import (
     SchemaObject,
     Server,
     Description,
-    ServiceLevelAgreementProperty
+    ServiceLevelAgreementProperty,
 )
 
 
@@ -37,7 +37,7 @@ class TestODCSDataContract:
             "kind": "DataContract",
             "apiVersion": "v3.0.2",
             "id": "test-contract-001",
-            "status": "active"
+            "status": "active",
         }
 
         contract = ODCSDataContract(**data)
@@ -66,15 +66,15 @@ class TestODCSDataContract:
             "version": "1.0.0",
             "kind": "DataContract",
             "apiVersion": "v3.0.2",
-            "status": "active"
+            "status": "active",
         }
 
         with pytest.raises(ValidationError) as excinfo:
             ODCSDataContract(**data)
 
         errors = excinfo.value.errors()
-        field_names = [error['loc'][0] for error in errors]
-        assert 'id' in field_names
+        field_names = [error["loc"][0] for error in errors]
+        assert "id" in field_names
 
     def test_invalid_enum_values(self):
         """Test validation error for invalid enum values."""
@@ -83,7 +83,7 @@ class TestODCSDataContract:
             "kind": "InvalidKind",  # Invalid enum value
             "apiVersion": "v3.0.2",
             "id": "test-contract-001",
-            "status": "active"
+            "status": "active",
         }
 
         with pytest.raises(ValidationError) as excinfo:
@@ -98,7 +98,7 @@ class TestODCSDataContract:
             "kind": "DataContract",
             "apiVersion": "v99.99.99",  # Invalid version
             "id": "test-contract-001",
-            "status": "active"
+            "status": "active",
         }
 
         with pytest.raises(ValidationError):
@@ -112,7 +112,7 @@ class TestODCSDataContract:
             "apiVersion": "v3.0.2",
             "id": "test-contract-001",
             "status": "active",
-            "extraField": "should not be allowed"
+            "extraField": "should not be allowed",
         }
 
         with pytest.raises(ValidationError) as excinfo:
@@ -128,7 +128,7 @@ class TestODCSDataContract:
             "apiVersion": "v3.0.2",
             "id": "test-contract-001",
             "status": "active",
-            "contractCreatedTs": "2024-01-15T09:00:00Z"
+            "contractCreatedTs": "2024-01-15T09:00:00Z",
         }
 
         contract = ODCSDataContract(**data)
@@ -142,7 +142,7 @@ class TestODCSDataContract:
             "apiVersion": "v3.0.2",
             "id": "test-contract-001",
             "status": "active",
-            "contractCreatedTs": "invalid-datetime"
+            "contractCreatedTs": "invalid-datetime",
         }
 
         with pytest.raises(ValidationError):
@@ -198,7 +198,7 @@ class TestServer:
             description="Test database server",
             host="localhost",
             port=5432,
-            database="testdb"
+            database="testdb",
         )
 
         assert server.server == "test-server"
@@ -208,10 +208,7 @@ class TestServer:
 
     def test_server_with_minimal_fields(self):
         """Test server with only required fields."""
-        server = Server(
-            server="minimal-server",
-            type=ServerTypeEnum.MYSQL
-        )
+        server = Server(server="minimal-server", type=ServerTypeEnum.MYSQL)
 
         assert server.server == "minimal-server"
         assert server.type == ServerTypeEnum.MYSQL
@@ -220,10 +217,7 @@ class TestServer:
     def test_invalid_server_type(self):
         """Test validation error for invalid server type."""
         with pytest.raises(ValidationError):
-            Server(
-                server="test-server",
-                type="invalid_type"
-            )
+            Server(server="test-server", type="invalid_type")
 
     def test_server_with_all_optional_fields(self):
         """Test server with all optional fields."""
@@ -239,7 +233,7 @@ class TestServer:
             schema="PUBLIC",
             project="my-project",
             catalog="my-catalog",
-            format="parquet"
+            format="parquet",
         )
 
         assert server.environment == "production"
@@ -259,7 +253,8 @@ class TestSchemaProperty:
             physicalType="VARCHAR(255)",
             description="Test field description",
             required=True,
-            primaryKey=True
+            primaryKey=True,
+            primaryKeyPosition=1,
         )
 
         assert prop.name == "test_field"
@@ -278,21 +273,14 @@ class TestSchemaProperty:
 
     def test_primary_key_position_validation(self):
         """Test primary key position validation."""
-        prop = SchemaProperty(
-            name="id_field",
-            primaryKey=True,
-            primaryKeyPosition=1
-        )
+        prop = SchemaProperty(name="id_field", primaryKey=True, primaryKeyPosition=1)
 
         assert prop.primaryKeyPosition == 1
 
     def test_invalid_logical_type(self):
         """Test validation error for invalid logical type."""
         with pytest.raises(ValidationError):
-            SchemaProperty(
-                name="test_field",
-                logicalType="invalid_type"
-            )
+            SchemaProperty(name="test_field", logicalType="invalid_type")
 
 
 @pytest.mark.unit
@@ -310,9 +298,10 @@ class TestSchemaObject:
                 SchemaProperty(
                     name="id",
                     logicalType=LogicalTypeEnum.INTEGER,
-                    primaryKey=True
+                    primaryKey=True,
+                    primaryKeyPosition=1,
                 )
-            ]
+            ],
         )
 
         assert schema_obj.name == "test_table"
@@ -339,7 +328,7 @@ class TestDataQuality:
             description="Check for duplicate values",
             dimension=QualityDimensionEnum.UNIQUENESS,
             type="library",
-            severity="error"
+            severity="error",
         )
 
         assert quality.name == "uniqueness_check"
@@ -364,19 +353,16 @@ class TestSupportItem:
             url="https://support.example.com",
             description="Primary support channel",
             tool="web",
-            scope="issues"
+            scope="issues",
         )
 
         assert support.channel == "help-desk"
-        assert support.url == "https://support.example.com"
+        assert str(support.url) == "https://support.example.com/"
         assert support.tool == "web"
 
     def test_support_item_minimal_fields(self):
         """Test support item with only required fields."""
-        support = SupportItem(
-            channel="email-support",
-            url="https://email.example.com"
-        )
+        support = SupportItem(channel="email-support", url="https://email.example.com")
 
         assert support.channel == "email-support"
         assert support.description is None
@@ -394,7 +380,7 @@ class TestTeam:
             role="Data Engineer",
             description="Senior data engineer",
             dateIn="2024-01-15",
-            dateOut="2024-12-31"
+            dateOut="2024-12-31",
         )
 
         assert member.username == "john.doe@example.com"
@@ -419,7 +405,7 @@ class TestRole:
             role="data_analyst",
             description="Read-only access to analytics data",
             access="SELECT",
-            firstLevelApprovers="manager@example.com"
+            firstLevelApprovers="manager@example.com",
         )
 
         assert role.role == "data_analyst"
@@ -440,11 +426,7 @@ class TestPricing:
 
     def test_valid_pricing(self):
         """Test valid pricing creation."""
-        pricing = Pricing(
-            priceAmount=99.99,
-            priceCurrency="USD",
-            priceUnit="per GB"
-        )
+        pricing = Pricing(priceAmount=99.99, priceCurrency="USD", priceUnit="per GB")
 
         assert pricing.priceAmount == 99.99
         assert pricing.priceCurrency == "USD"
@@ -469,7 +451,7 @@ class TestServiceLevelAgreementProperty:
             value=99.9,
             unit="percent",
             element="main_table",
-            driver="operational"
+            driver="operational",
         )
 
         assert sla.property == "availability"
@@ -479,24 +461,15 @@ class TestServiceLevelAgreementProperty:
     def test_sla_property_different_value_types(self):
         """Test SLA property with different value types."""
         # Numeric value
-        sla1 = ServiceLevelAgreementProperty(
-            property="latency",
-            value=100
-        )
+        sla1 = ServiceLevelAgreementProperty(property="latency", value=100)
         assert sla1.value == 100
 
         # String value
-        sla2 = ServiceLevelAgreementProperty(
-            property="status",
-            value="active"
-        )
+        sla2 = ServiceLevelAgreementProperty(property="status", value="active")
         assert sla2.value == "active"
 
         # Boolean value
-        sla3 = ServiceLevelAgreementProperty(
-            property="enabled",
-            value=True
-        )
+        sla3 = ServiceLevelAgreementProperty(property="enabled", value=True)
         assert sla3.value is True
 
 
@@ -509,7 +482,7 @@ class TestDescription:
         desc = Description(
             usage="Data analysis and reporting",
             purpose="Business intelligence",
-            limitations="Batch processing only"
+            limitations="Batch processing only",
         )
 
         assert desc.usage == "Data analysis and reporting"
@@ -531,8 +504,7 @@ class TestAuthoritativeDefinition:
     def test_valid_authoritative_definition(self):
         """Test valid authoritative definition creation."""
         auth_def = AuthoritativeDefinition(
-            url="https://docs.example.com/data-contract",
-            type="businessDefinition"
+            url="https://docs.example.com/data-contract", type="businessDefinition"
         )
 
         assert str(auth_def.url) == "https://docs.example.com/data-contract"
@@ -541,10 +513,7 @@ class TestAuthoritativeDefinition:
     def test_invalid_url_format(self):
         """Test validation error for invalid URL format."""
         with pytest.raises(ValidationError):
-            AuthoritativeDefinition(
-                url="not-a-valid-url",
-                type="businessDefinition"
-            )
+            AuthoritativeDefinition(url="not-a-valid-url", type="businessDefinition")
 
 
 @pytest.mark.unit
