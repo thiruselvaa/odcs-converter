@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    {name = "Thiruselva", email = "thiruselvaa@gmail.com"},
 ]
 keywords = ["odcs", "excel", "data-contract", "json-schema", "open-data"]
 classifiers = [
@@ -56,10 +56,10 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/odcs-excel-generator"
-Documentation = "https://github.com/yourusername/odcs-excel-generator#readme"
-Repository = "https://github.com/yourusername/odcs-excel-generator"
-Issues = "https://github.com/yourusername/odcs-excel-generator/issues"
+Homepage = "https://github.com/thiruselvaa/odcs-excel-generator"
+Documentation = "https://github.com/thiruselvaa/odcs-excel-generator#readme"
+Repository = "https://github.com/thiruselvaa/odcs-excel-generator"
+Issues = "https://github.com/thiruselvaa/odcs-excel-generator/issues"
 
 [project.scripts]
 odcs-excel = "odcs_excel_generator.cli:main"

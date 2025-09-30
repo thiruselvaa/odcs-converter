@@ -25,7 +25,7 @@ pip install odcs-excel-generator
 ### From source
 
 ```bash
-git clone https://github.com/yourusername/odcs-excel-generator.git
+git clone https://github.com/thiruselvaa/odcs-excel-generator.git
 cd odcs-excel-generator
 pip install -e ".[dev]"
 ```
@@ -90,8 +90,9 @@ The generated Excel file contains separate worksheets for each top-level ODCS fi
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/odcs-excel-generator.git
+git clone https://github.com/thiruselvaa/odcs-excel-generator.git
 cd odcs-excel-generator
+```
 
 # Install dependencies
 pip install -e ".[dev]"
