@@ -179,5 +179,8 @@ demo_logs/
 test_logs/
 *.log
 
+# Demo templates
+demo_templates/
+
 # Accidental pip installation logs
 =*
