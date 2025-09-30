@@ -2,7 +2,7 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Union, Optional
 from datetime import datetime
 
 import pandas as pd
@@ -97,11 +97,18 @@ class ExcelToODCSParser:
         odcs_data = {}
 
         # Parse each worksheet type
+        # Parse all sections
         odcs_data.update(self._parse_basic_information())
         odcs_data.update(self._parse_tags())
         odcs_data.update(self._parse_description())
         odcs_data.update(self._parse_servers())
         odcs_data.update(self._parse_schema())
+
+        # Parse enhanced schema data
+        self._enhance_schema_with_properties(odcs_data)
+        self._enhance_schema_with_logical_type_options(odcs_data)
+        self._enhance_schema_with_quality_rules(odcs_data)
+
         odcs_data.update(self._parse_support())
         odcs_data.update(self._parse_pricing())
         odcs_data.update(self._parse_team())
@@ -407,6 +414,7 @@ class ExcelToODCSParser:
             field_mappings = {
                 "Property": "property",
                 "Value": "value",
+                "Value Ext": "valueExt",
                 "Unit": "unit",
                 "Element": "element",
                 "Driver": "driver",
@@ -415,7 +423,7 @@ class ExcelToODCSParser:
             for excel_field, odcs_field in field_mappings.items():
                 value = row.get(excel_field)
                 if value is not None and value != "":
-                    if odcs_field == "value":
+                    if odcs_field in ["value", "valueExt"]:
                         # Try to convert to appropriate type
                         sla_prop[odcs_field] = self._convert_value(value)
                     else:
@@ -474,6 +482,340 @@ class ExcelToODCSParser:
                 )
 
         return {"customProperties": custom_properties} if custom_properties else {}
+
+    def _enhance_schema_with_properties(self, odcs_data: Dict[str, Any]) -> None:
+        """Enhance schema objects with detailed property information."""
+        sheet_name = "Schema Properties"
+        if sheet_name not in self.worksheets or "schema" not in odcs_data:
+            return
+
+        df = self.worksheets[sheet_name]
+        if df.empty:
+            return
+
+        # Create a map of schema objects by name for easy lookup
+        schema_objects = {obj["name"]: obj for obj in odcs_data["schema"]}
+
+        # Initialize properties array for each schema object if not exists
+        for obj in odcs_data["schema"]:
+            if "properties" not in obj:
+                obj["properties"] = []
+
+        for _, row in df.iterrows():
+            obj_name = str(row.get("Object Name", ""))
+            if obj_name in schema_objects and pd.notna(row.get("Property Name")):
+                prop = {
+                    "name": str(row.get("Property Name", "")),
+                    "logicalType": self._parse_string(row.get("Logical Type")),
+                    "physicalType": self._parse_string(row.get("Physical Type")),
+                    "physicalName": self._parse_string(row.get("Physical Name")),
+                    "description": self._parse_string(row.get("Description")),
+                    "businessName": self._parse_string(row.get("Business Name")),
+                    "required": self._parse_boolean(row.get("Required", False)),
+                    "unique": self._parse_boolean(row.get("Unique", False)),
+                    "primaryKey": self._parse_boolean(row.get("Primary Key", False)),
+                    "primaryKeyPosition": self._parse_int(row.get("PK Position", -1)),
+                    "partitioned": self._parse_boolean(row.get("Partitioned", False)),
+                    "partitionKeyPosition": self._parse_int(
+                        row.get("Partition Position", -1)
+                    ),
+                    "classification": self._parse_string(row.get("Classification")),
+                    "encryptedName": self._parse_string(row.get("Encrypted Name")),
+                    "criticalDataElement": self._parse_boolean(
+                        row.get("Critical Data Element", False)
+                    ),
+                    "transformLogic": self._parse_string(row.get("Transform Logic")),
+                    "transformDescription": self._parse_string(
+                        row.get("Transform Description")
+                    ),
+                }
+
+                # Parse transform sources
+                transform_sources_str = self._parse_string(row.get("Transform Sources"))
+                if transform_sources_str:
+                    prop["transformSourceObjects"] = [
+                        s.strip() for s in transform_sources_str.split(",") if s.strip()
+                    ]
+
+                # Parse examples
+                examples_str = self._parse_string(row.get("Examples"))
+                if examples_str:
+                    prop["examples"] = [
+                        ex.strip() for ex in examples_str.split(",") if ex.strip()
+                    ]
+
+                # Parse tags
+                tags_str = self._parse_string(row.get("Tags"))
+                if tags_str:
+                    prop["tags"] = [
+                        tag.strip() for tag in tags_str.split(",") if tag.strip()
+                    ]
+
+                # Initialize empty collections
+                prop["quality"] = []
+                prop["authoritativeDefinitions"] = []
+
+                # Remove None values and empty strings
+                prop = {k: v for k, v in prop.items() if v is not None and v != ""}
+                schema_objects[obj_name]["properties"].append(prop)
+
+    def _enhance_schema_with_logical_type_options(
+        self, odcs_data: Dict[str, Any]
+    ) -> None:
+        """Enhance schema properties with logical type options."""
+        sheet_name = "Logical Type Options"
+        if sheet_name not in self.worksheets or "schema" not in odcs_data:
+            return
+
+        df = self.worksheets[sheet_name]
+        if df.empty:
+            return
+
+        # Create a map for easy property lookup
+        for _, row in df.iterrows():
+            obj_name = str(row.get("Object Name", ""))
+            prop_name = str(row.get("Property Name", ""))
+
+            # Find the property in the schema
+            for obj in odcs_data["schema"]:
+                if obj["name"] == obj_name:
+                    for prop in obj.get("properties", []):
+                        if prop["name"] == prop_name:
+                            options = {}
+
+                            # String options
+                            if pd.notna(row.get("Format")):
+                                options["format"] = self._parse_string(
+                                    row.get("Format")
+                                )
+                            if pd.notna(row.get("Min Length")):
+                                options["minLength"] = self._parse_int(
+                                    row.get("Min Length")
+                                )
+                            if pd.notna(row.get("Max Length")):
+                                options["maxLength"] = self._parse_int(
+                                    row.get("Max Length")
+                                )
+                            if pd.notna(row.get("Pattern")):
+                                options["pattern"] = self._parse_string(
+                                    row.get("Pattern")
+                                )
+
+                            # Number options
+                            if pd.notna(row.get("Minimum")):
+                                options["minimum"] = self._parse_number(
+                                    row.get("Minimum")
+                                )
+                            if pd.notna(row.get("Maximum")):
+                                options["maximum"] = self._parse_number(
+                                    row.get("Maximum")
+                                )
+                            if pd.notna(row.get("Exclusive Minimum")):
+                                options["exclusiveMinimum"] = self._parse_boolean(
+                                    row.get("Exclusive Minimum")
+                                )
+                            if pd.notna(row.get("Exclusive Maximum")):
+                                options["exclusiveMaximum"] = self._parse_boolean(
+                                    row.get("Exclusive Maximum")
+                                )
+                            if pd.notna(row.get("Multiple Of")):
+                                options["multipleOf"] = self._parse_number(
+                                    row.get("Multiple Of")
+                                )
+
+                            # Array options
+                            if pd.notna(row.get("Min Items")):
+                                options["minItems"] = self._parse_int(
+                                    row.get("Min Items")
+                                )
+                            if pd.notna(row.get("Max Items")):
+                                options["maxItems"] = self._parse_int(
+                                    row.get("Max Items")
+                                )
+                            if pd.notna(row.get("Unique Items")):
+                                options["uniqueItems"] = self._parse_boolean(
+                                    row.get("Unique Items")
+                                )
+
+                            # Object options
+                            if pd.notna(row.get("Min Properties")):
+                                options["minProperties"] = self._parse_int(
+                                    row.get("Min Properties")
+                                )
+                            if pd.notna(row.get("Max Properties")):
+                                options["maxProperties"] = self._parse_int(
+                                    row.get("Max Properties")
+                                )
+
+                            required_props_str = self._parse_string(
+                                row.get("Required Properties")
+                            )
+                            if required_props_str:
+                                options["required"] = [
+                                    p.strip()
+                                    for p in required_props_str.split(",")
+                                    if p.strip()
+                                ]
+
+                            if options:
+                                prop["logicalTypeOptions"] = options
+
+    def _enhance_schema_with_quality_rules(self, odcs_data: Dict[str, Any]) -> None:
+        """Enhance schema objects and properties with quality rules."""
+        sheet_name = "Quality Rules"
+        if sheet_name not in self.worksheets or "schema" not in odcs_data:
+            return
+
+        df = self.worksheets[sheet_name]
+        if df.empty:
+            return
+
+        # Initialize quality arrays for each schema object and property if not exists
+        for obj in odcs_data["schema"]:
+            if "quality" not in obj:
+                obj["quality"] = []
+            for prop in obj.get("properties", []):
+                if "quality" not in prop:
+                    prop["quality"] = []
+
+        for _, row in df.iterrows():
+            obj_name = str(row.get("Object Name", ""))
+            prop_name = str(row.get("Property Name", ""))
+            level = str(row.get("Level", ""))
+
+            if not pd.notna(row.get("Name")) and not pd.notna(row.get("Description")):
+                continue
+
+            rule = {
+                "name": self._parse_string(row.get("Name")),
+                "description": self._parse_string(row.get("Description")),
+                "type": self._parse_string(row.get("Type")) or "library",
+                "rule": self._parse_string(row.get("Rule")),
+                "dimension": self._parse_string(row.get("Dimension")),
+                "severity": self._parse_string(row.get("Severity")),
+                "businessImpact": self._parse_string(row.get("Business Impact")),
+                "unit": self._parse_string(row.get("Unit")),
+                "query": self._parse_string(row.get("Query")),
+                "engine": self._parse_string(row.get("Engine")),
+                "implementation": self._parse_string(row.get("Implementation")),
+                "method": self._parse_string(row.get("Method")),
+                "scheduler": self._parse_string(row.get("Scheduler")),
+                "schedule": self._parse_string(row.get("Schedule")),
+            }
+
+            # Parse comparison operators
+            if pd.notna(row.get("Must Be")):
+                rule["mustBe"] = self._parse_number(row.get("Must Be"))
+            if pd.notna(row.get("Must Not Be")):
+                rule["mustNotBe"] = self._parse_number(row.get("Must Not Be"))
+            if pd.notna(row.get("Must Be Greater Than")):
+                rule["mustBeGreaterThan"] = self._parse_number(
+                    row.get("Must Be Greater Than")
+                )
+            if pd.notna(row.get("Must Be Greater Or Equal")):
+                rule["mustBeGreaterOrEqualTo"] = self._parse_number(
+                    row.get("Must Be Greater Or Equal")
+                )
+            if pd.notna(row.get("Must Be Less Than")):
+                rule["mustBeLessThan"] = self._parse_number(
+                    row.get("Must Be Less Than")
+                )
+            if pd.notna(row.get("Must Be Less Or Equal")):
+                rule["mustBeLessOrEqualTo"] = self._parse_number(
+                    row.get("Must Be Less Or Equal")
+                )
+
+            # Parse between operators
+            between_str = self._parse_string(row.get("Must Be Between"))
+            if between_str:
+                try:
+                    rule["mustBeBetween"] = [
+                        self._parse_number(v.strip())
+                        for v in between_str.split(",")
+                        if v.strip()
+                    ]
+                except (ValueError, TypeError):
+                    pass
+
+            not_between_str = self._parse_string(row.get("Must Not Be Between"))
+            if not_between_str:
+                try:
+                    rule["mustNotBeBetween"] = [
+                        self._parse_number(v.strip())
+                        for v in not_between_str.split(",")
+                        if v.strip()
+                    ]
+                except (ValueError, TypeError):
+                    pass
+
+            # Parse valid values
+            valid_values_str = self._parse_string(row.get("Valid Values"))
+            if valid_values_str:
+                rule["validValues"] = [
+                    v.strip() for v in valid_values_str.split(",") if v.strip()
+                ]
+
+            # Parse tags
+            tags_str = self._parse_string(row.get("Tags"))
+            if tags_str:
+                rule["tags"] = [
+                    tag.strip() for tag in tags_str.split(",") if tag.strip()
+                ]
+
+            # Remove None values
+            rule = {k: v for k, v in rule.items() if v is not None and v != ""}
+
+            # Add rule to appropriate object or property
+            for obj in odcs_data["schema"]:
+                if obj["name"] == obj_name:
+                    if level == "object" or not prop_name:
+                        if "quality" not in obj:
+                            obj["quality"] = []
+                        obj["quality"].append(rule)
+                    elif level == "property" and prop_name:
+                        for prop in obj.get("properties", []):
+                            if prop["name"] == prop_name:
+                                if "quality" not in prop:
+                                    prop["quality"] = []
+                                prop["quality"].append(rule)
+
+    def _parse_boolean(self, value) -> bool:
+        """Parse boolean value from Excel."""
+        if pd.isna(value):
+            return False
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, str):
+            return value.lower() in ("true", "yes", "1", "on")
+        return bool(value)
+
+    def _parse_int(self, value) -> int:
+        """Parse integer value from Excel."""
+        if pd.isna(value):
+            return -1
+        try:
+            return int(float(value))
+        except (ValueError, TypeError):
+            return -1
+
+    def _parse_number(self, value) -> Union[int, float]:
+        """Parse numeric value from Excel."""
+        if pd.isna(value):
+            return None
+        try:
+            num = float(value)
+            return int(num) if num.is_integer() else num
+        except (ValueError, TypeError):
+            return None
+
+    def _parse_string(self, value) -> Optional[str]:
+        """Parse string value from Excel, handling None/NaN properly."""
+        if pd.isna(value) or value is None:
+            return None
+        str_val = str(value).strip()
+        if str_val == "" or str_val.lower() == "nan":
+            return None
+        return str_val
 
     def _convert_value(self, value: Any) -> Any:
         """Convert Excel value to appropriate Python type."""
