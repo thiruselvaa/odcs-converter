@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  odcs-excel-generator:
+    build: .
+    volumes:
+      - ./data:/app/data
+      - ./examples:/app/examples
+    environment:
+      - LOG_LEVEL=INFO
+    working_dir: /app
+    
+  dev:
+    build: .
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - LOG_LEVEL=DEBUG
+    working_dir: /app
+    entrypoint: ["/bin/bash"]
+    stdin_open: true
+    tty: true
