@@ -28,6 +28,7 @@ Everything related to testing the project.
 
 - **[Testing Guide](testing/TESTING.md)** - How to write and run tests
 - **[Test Fixes Summary](testing/TEST_FIXES_SUMMARY.md)** - Recent test improvements
+- **[Lint Fixes Summary](testing/LINT_FIXES_SUMMARY.md)** - Code quality and lint resolutions
 - **[Test Coverage Report](testing/COVERAGE.md)** - Coverage reports *(coming soon)*
 
 ### 🚀 Deployment Documentation
