@@ -203,6 +203,38 @@ Thanks to **uv**, this tool is exceptionally fast:
 - **Instant environment setup** with `uv sync`
 - **Reproducible builds** with uv.lock
 
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`docs/`](docs/) directory:
+
+### For Users
+- **[User Guide](docs/user/USER_GUIDE.md)** - Complete usage instructions
+- **[CLI Reference](docs/user/CLI.md)** - Command-line interface documentation
+- **[Examples](docs/user/EXAMPLES.md)** - Code examples and tutorials
+
+### For Developers
+- **[Setup Guide](docs/development/SETUP.md)** - Development environment setup
+- **[Contributing Guide](docs/development/CONTRIBUTING.md)** - How to contribute
+- **[Architecture](docs/development/ARCHITECTURE.md)** - System design overview
+- **[API Reference](docs/development/API.md)** - Detailed API documentation
+- **[Project Structure](docs/development/PROJECT_STRUCTURE.md)** - Codebase organization
+
+### For Testing
+- **[Testing Guide](docs/testing/TESTING.md)** - How to write and run tests
+- **[Test Fixes Summary](docs/testing/TEST_FIXES_SUMMARY.md)** - Recent test improvements
+- **[Coverage Report](docs/testing/COVERAGE.md)** - Current test coverage
+
+### For Deployment
+- **[Deployment Guide](docs/deployment/DEPLOYMENT.md)** - How to deploy
+- **[Docker Guide](docs/deployment/DOCKER.md)** - Container usage
+- **[Configuration](docs/deployment/CONFIGURATION.md)** - Configuration options
+
+### Utility Scripts
+- **[Scripts Documentation](scripts/README.md)** - Available utility scripts
+  - `scripts/setup_tests.py` - Initialize test structure
+  - `scripts/run_checks.sh` - Run all quality checks
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
