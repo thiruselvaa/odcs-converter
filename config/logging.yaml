@@ -1,0 +1,189 @@
+# ODCS Converter Logging Configuration
+# This file defines logging settings for different environments
+
+# Default configuration
+defaults:
+  app_name: "odcs-converter"
+  log_dir: "logs"
+  correlation_id_length: 8
+  max_string_length: 1000  # Maximum length for string values in logs
+
+# Environment-specific configurations
+environments:
+  local:
+    level: "DEBUG"
+    console:
+      enabled: true
+      format: "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | <level>{message}</level>"
+      colorize: true
+    file:
+      enabled: true
+      format: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {extra[correlation_id]} | {message}"
+      rotation: "10 MB"
+      retention: "7 days"
+      compression: "zip"
+    structured:
+      enabled: false
+      format: "json"
+    features:
+      backtrace: true
+      diagnose: true
+      enqueue: false
+      catch: true
+
+  dev:
+    level: "DEBUG"
+    console:
+      enabled: true
+      format: "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan> | <level>{message}</level>"
+      colorize: true
+    file:
+      enabled: true
+      format: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {extra[correlation_id]} | {message}"
+      rotation: "50 MB"
+      retention: "14 days"
+      compression: "zip"
+    structured:
+      enabled: true
+      format: "json"
+      rotation: "100 MB"
+      retention: "30 days"
+    features:
+      backtrace: true
+      diagnose: true
+      enqueue: false
+      catch: true
+
+  test:
+    level: "WARNING"
+    console:
+      enabled: false
+      format: "{time:HH:mm:ss} | {level: <8} | {name} | {message}"
+      colorize: false
+    file:
+      enabled: true
+      format: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {extra[correlation_id]} | {message}"
+      rotation: "20 MB"
+      retention: "3 days"
+      compression: "gz"
+    structured:
+      enabled: false
+      format: "json"
+    features:
+      backtrace: false
+      diagnose: false
+      enqueue: true
+      catch: false
+
+  stage:
+    level: "INFO"
+    console:
+      enabled: true
+      format: "{time:HH:mm:ss} | {level: <8} | {message}"
+      colorize: false
+    file:
+      enabled: true
+      format: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {extra[correlation_id]} | {message}"
+      rotation: "100 MB"
+      retention: "30 days"
+      compression: "gz"
+    structured:
+      enabled: true
+      format: "json"
+      rotation: "200 MB"
+      retention: "60 days"
+    features:
+      backtrace: true
+      diagnose: false
+      enqueue: true
+      catch: true
+
+  prod:
+    level: "INFO"
+    console:
+      enabled: false
+      format: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}"
+      colorize: false
+    file:
+      enabled: true
+      format: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {extra[correlation_id]} | {message}"
+      rotation: "500 MB"
+      retention: "90 days"
+      compression: "gz"
+    structured:
+      enabled: true
+      format: "json"
+      rotation: "1 GB"
+      retention: "180 days"
+      compression: "gz"
+    features:
+      backtrace: false
+      diagnose: false
+      enqueue: true
+      catch: true
+
+# Log file naming patterns
+file_patterns:
+  main: "{app_name}-{date}.log"
+  error: "{app_name}-error-{date}.log"
+  structured: "{app_name}-structured-{date}.jsonl"
+  performance: "{app_name}-performance-{date}.log"
+
+# Performance logging configuration
+performance:
+  enabled: true
+  threshold_ms: 1000  # Log operations taking longer than 1 second
+  include_args: false  # Include function arguments in performance logs
+  include_result: false  # Include function results in performance logs
+
+# Security settings
+security:
+  mask_sensitive_fields: true
+  sensitive_patterns:
+    - "password"
+    - "token"
+    - "key"
+    - "secret"
+    - "auth"
+    - "credential"
+  mask_character: "*"
+  max_field_length: 100
+
+# Integration settings
+integrations:
+  rich:
+    enabled: true
+    console_width: null  # Auto-detect
+    force_terminal: true
+    legacy_windows: false
+
+  sentry:
+    enabled: false
+    dsn: ""
+    environment: ""
+    traces_sample_rate: 0.1
+
+  prometheus:
+    enabled: false
+    metrics_port: 8000
+    include_labels: ["environment", "level", "logger"]
+
+# Custom formatters
+formatters:
+  simple: "{time:HH:mm:ss} | {level} | {message}"
+  detailed: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} | {message}"
+  json_compact: '{"time":"{time:ISO8601}","level":"{level}","message":"{message}"}'
+  json_detailed: '{"timestamp":"{time:ISO8601}","level":"{level}","logger":"{name}","function":"{function}","line":{line},"message":"{message}","correlation_id":"{extra[correlation_id]}"}'
+
+# Environment variable mappings
+env_vars:
+  ODCS_ENV: "environment"
+  ODCS_LOG_LEVEL: "level"
+  ODCS_LOG_DIR: "log_dir"
+  ODCS_LOG_CONSOLE: "console.enabled"
+  ODCS_LOG_FILE: "file.enabled"
+  ODCS_LOG_STRUCTURED: "structured.enabled"
+  ODCS_LOG_ROTATION: "file.rotation"
+  ODCS_LOG_RETENTION: "file.retention"
+  ODCS_LOG_COMPRESSION: "file.compression"
+  ODCS_LOG_CORRELATION_ID: "correlation_id"

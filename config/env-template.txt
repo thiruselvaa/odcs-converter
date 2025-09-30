@@ -1,0 +1,152 @@
+# ODCS Converter Environment Configuration Template
+# Copy this file to .env in your project root and customize the values
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+
+# Environment (local, dev, test, stage, prod)
+ODCS_ENV=local
+
+# Log Level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+ODCS_LOG_LEVEL=INFO
+
+# Log Directory (relative to project root or absolute path)
+ODCS_LOG_DIR=logs
+
+# Console Logging (true/false)
+ODCS_LOG_CONSOLE=true
+
+# File Logging (true/false)
+ODCS_LOG_FILE=true
+
+# Structured Logging - JSON format (true/false)
+ODCS_LOG_STRUCTURED=false
+
+# Log Rotation Size (e.g., 10 MB, 50 MB, 100 MB)
+ODCS_LOG_ROTATION=10 MB
+
+# Log Retention Period (e.g., 7 days, 14 days, 30 days)
+ODCS_LOG_RETENTION=7 days
+
+# Log Compression (zip, gz, none)
+ODCS_LOG_COMPRESSION=zip
+
+# Correlation ID for request tracking (auto-generated if not set)
+# ODCS_LOG_CORRELATION_ID=
+
+# =============================================================================
+# APPLICATION CONFIGURATION
+# =============================================================================
+
+# Application Name (used in log file names)
+ODCS_APP_NAME=odcs-converter
+
+# Excel Configuration Directory
+ODCS_CONFIG_DIR=config
+
+# Default Excel Template Path
+ODCS_EXCEL_TEMPLATE=templates/odcs_template.xlsx
+
+# =============================================================================
+# PERFORMANCE MONITORING
+# =============================================================================
+
+# Enable Performance Tracking (true/false)
+ODCS_PERFORMANCE_ENABLED=true
+
+# Performance Log Threshold in milliseconds
+ODCS_PERFORMANCE_THRESHOLD_MS=1000
+
+# Include Function Arguments in Performance Logs (true/false)
+ODCS_PERFORMANCE_LOG_ARGS=false
+
+# Include Function Results in Performance Logs (true/false)
+ODCS_PERFORMANCE_LOG_RESULT=false
+
+# =============================================================================
+# SECURITY SETTINGS
+# =============================================================================
+
+# Mask Sensitive Data in Logs (true/false)
+ODCS_SECURITY_MASK_SENSITIVE=true
+
+# Maximum Field Length in Logs
+ODCS_SECURITY_MAX_FIELD_LENGTH=100
+
+# Sensitive Field Patterns (comma-separated)
+ODCS_SECURITY_SENSITIVE_PATTERNS=password,token,key,secret,auth,credential
+
+# =============================================================================
+# INTEGRATION SETTINGS
+# =============================================================================
+
+# Rich Console Integration (true/false)
+ODCS_RICH_ENABLED=true
+
+# Force Terminal Colors (true/false)
+ODCS_RICH_FORCE_TERMINAL=true
+
+# Sentry Integration (optional - for error tracking)
+# ODCS_SENTRY_ENABLED=false
+# ODCS_SENTRY_DSN=
+# ODCS_SENTRY_ENVIRONMENT=
+# ODCS_SENTRY_TRACES_SAMPLE_RATE=0.1
+
+# Prometheus Metrics (optional - for monitoring)
+# ODCS_PROMETHEUS_ENABLED=false
+# ODCS_PROMETHEUS_PORT=8000
+
+# =============================================================================
+# DEVELOPMENT SETTINGS
+# =============================================================================
+
+# Debug Mode (true/false)
+ODCS_DEBUG=false
+
+# Dry Run Mode (true/false) - for testing without actual file operations
+ODCS_DRY_RUN=false
+
+# Validation Mode (true/false) - strict validation of ODCS schemas
+ODCS_STRICT_VALIDATION=false
+
+# =============================================================================
+# EXAMPLE ENVIRONMENT-SPECIFIC CONFIGURATIONS
+# =============================================================================
+
+# For Local Development:
+# ODCS_ENV=local
+# ODCS_LOG_LEVEL=DEBUG
+# ODCS_LOG_CONSOLE=true
+# ODCS_LOG_FILE=true
+# ODCS_LOG_STRUCTURED=false
+
+# For Development Environment:
+# ODCS_ENV=dev
+# ODCS_LOG_LEVEL=DEBUG
+# ODCS_LOG_CONSOLE=true
+# ODCS_LOG_FILE=true
+# ODCS_LOG_STRUCTURED=true
+
+# For Test Environment:
+# ODCS_ENV=test
+# ODCS_LOG_LEVEL=WARNING
+# ODCS_LOG_CONSOLE=false
+# ODCS_LOG_FILE=true
+# ODCS_LOG_STRUCTURED=false
+
+# For Staging Environment:
+# ODCS_ENV=stage
+# ODCS_LOG_LEVEL=INFO
+# ODCS_LOG_CONSOLE=true
+# ODCS_LOG_FILE=true
+# ODCS_LOG_STRUCTURED=true
+
+# For Production Environment:
+# ODCS_ENV=prod
+# ODCS_LOG_LEVEL=INFO
+# ODCS_LOG_CONSOLE=false
+# ODCS_LOG_FILE=true
+# ODCS_LOG_STRUCTURED=true
+# ODCS_LOG_ROTATION=500 MB
+# ODCS_LOG_RETENTION=90 days
