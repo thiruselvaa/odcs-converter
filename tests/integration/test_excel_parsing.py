@@ -473,8 +473,11 @@ class TestExcelParsingWorkflow:
 
     def test_excel_parsing_memory_efficiency(self, temp_dir):
         """Test memory efficiency during Excel parsing."""
-        import psutil
-        import os
+        try:
+            import psutil
+            import os
+        except ImportError:
+            pytest.skip("psutil not available for memory testing")
 
         # Get initial memory usage
         process = psutil.Process(os.getpid())

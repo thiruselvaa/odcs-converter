@@ -93,11 +93,12 @@ class TestExcelGenerationWorkflow:
     ):
         """Test Excel generation with custom styling."""
         # Setup custom style
-        from openpyxl.styles import Font, PatternFill
+        from openpyxl.styles import Font, PatternFill, Alignment
 
         custom_style = {
             "header_font": Font(bold=True, color="FF0000"),  # Red
             "header_fill": PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid"),  # Yellow
+            "alignment": Alignment(horizontal="center", vertical="center"),
         }
 
         converter = ODCSToExcelConverter(style_config=custom_style)
@@ -317,8 +318,11 @@ class TestExcelGenerationWorkflow:
 
     def test_excel_generation_memory_efficiency(self, temp_dir):
         """Test memory efficiency during Excel generation."""
-        import psutil
-        import os
+        try:
+            import psutil
+            import os
+        except ImportError:
+            pytest.skip("psutil not available for memory testing")
 
         # Get initial memory usage
         process = psutil.Process(os.getpid())
