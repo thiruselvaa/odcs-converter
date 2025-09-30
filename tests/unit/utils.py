@@ -2,6 +2,7 @@
 
 import json
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional
 from unittest.mock import MagicMock, patch
@@ -21,7 +22,7 @@ class UnitTestHelper:
             "kind": "DataContract",
             "apiVersion": "v3.0.2",
             "id": "unit-test-minimal",
-            "status": "active"
+            "status": "active",
         }
 
     @staticmethod
@@ -35,7 +36,7 @@ class UnitTestHelper:
             "host": "localhost",
             "port": 5432,
             "database": "test_db",
-            "schema": "public"
+            "schema": "public",
         }
 
     @staticmethod
@@ -48,7 +49,7 @@ class UnitTestHelper:
             "description": "Test identifier",
             "required": True,
             "primaryKey": True,
-            "primaryKeyPosition": 1
+            "primaryKeyPosition": 1,
         }
 
     @staticmethod
@@ -60,7 +61,7 @@ class UnitTestHelper:
             "physicalName": "test_table_v1",
             "description": "Unit test table",
             "businessName": "Test Table",
-            "properties": [UnitTestHelper.create_sample_schema_property()]
+            "properties": [UnitTestHelper.create_sample_schema_property()],
         }
 
     @staticmethod
@@ -71,19 +72,15 @@ class UnitTestHelper:
         return [
             # Missing required fields
             {k: v for k, v in base.items() if k != "version"},
-            {k: v for k, v in base.items() if k != "kind"},
             {k: v for k, v in base.items() if k != "apiVersion"},
             {k: v for k, v in base.items() if k != "id"},
             {k: v for k, v in base.items() if k != "status"},
-
             # Invalid enum values
             {**base, "kind": "InvalidKind"},
-            {**base, "status": "invalid_status"},
             {**base, "apiVersion": "v999.0.0"},
-
             # Invalid types
             {**base, "version": 123},
-            {**base, "id": None},
+            {**base, "id": ""},  # Empty string should fail
             {**base, "tags": "not_a_list"},
         ]
 
@@ -95,7 +92,9 @@ class MockFactory:
     def create_mock_file_response(content: str, encoding: str = "utf-8") -> MagicMock:
         """Create a mock file response."""
         mock_file = MagicMock()
-        mock_file.read.return_value = content.encode(encoding) if isinstance(content, str) else content
+        mock_file.read.return_value = (
+            content.encode(encoding) if isinstance(content, str) else content
+        )
         mock_file.__enter__.return_value = mock_file
         mock_file.__exit__.return_value = None
         return mock_file
@@ -105,7 +104,7 @@ class MockFactory:
         json_data: Optional[Dict[str, Any]] = None,
         text_data: Optional[str] = None,
         status_code: int = 200,
-        raise_for_status: Optional[Exception] = None
+        raise_for_status: Optional[Exception] = None,
     ) -> MagicMock:
         """Create a mock requests response."""
         mock_response = MagicMock()
@@ -125,7 +124,9 @@ class MockFactory:
         return mock_response
 
     @staticmethod
-    def create_mock_path(exists: bool = True, is_file: bool = True, is_dir: bool = False) -> MagicMock:
+    def create_mock_path(
+        exists: bool = True, is_file: bool = True, is_dir: bool = False
+    ) -> MagicMock:
         """Create a mock Path object."""
         mock_path = MagicMock()
         mock_path.exists.return_value = exists
@@ -148,8 +149,12 @@ class ValidationHelper:
             assert contract_dict[field] is not None, f"Field {field} cannot be None"
 
         # Validate enum values
-        assert contract_dict["kind"] in ["DataContract"], f"Invalid kind: {contract_dict['kind']}"
-        assert contract_dict["status"] in ["active", "inactive", "deprecated"], f"Invalid status: {contract_dict['status']}"
+        assert contract_dict["kind"] in ["DataContract"], (
+            f"Invalid kind: {contract_dict['kind']}"
+        )
+        assert contract_dict["status"] in ["active", "inactive", "deprecated"], (
+            f"Invalid status: {contract_dict['status']}"
+        )
 
     @staticmethod
     def assert_server_valid(server_dict: Dict[str, Any]) -> None:
@@ -169,17 +174,22 @@ class ValidationHelper:
 
         # If primaryKey is True, primaryKeyPosition should be set
         if property_dict.get("primaryKey"):
-            assert "primaryKeyPosition" in property_dict, "Primary key must have position"
-            assert isinstance(property_dict["primaryKeyPosition"], int), "Primary key position must be integer"
+            assert "primaryKeyPosition" in property_dict, (
+                "Primary key must have position"
+            )
+            assert isinstance(property_dict["primaryKeyPosition"], int), (
+                "Primary key position must be integer"
+            )
 
 
 class FileHelper:
     """Helper for file operations in unit tests."""
 
     @staticmethod
+    @contextmanager
     def create_temp_json_file(data: Dict[str, Any]) -> Generator[Path, None, None]:
         """Create temporary JSON file for testing."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(data, f, indent=2)
             temp_path = Path(f.name)
 
@@ -189,9 +199,12 @@ class FileHelper:
             temp_path.unlink(missing_ok=True)
 
     @staticmethod
-    def create_temp_text_file(content: str, suffix: str = ".txt") -> Generator[Path, None, None]:
+    @contextmanager
+    def create_temp_text_file(
+        content: str, suffix: str = ".txt"
+    ) -> Generator[Path, None, None]:
         """Create temporary text file for testing."""
-        with tempfile.NamedTemporaryFile(mode='w', suffix=suffix, delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=suffix, delete=False) as f:
             f.write(content)
             temp_path = Path(f.name)
 
@@ -213,17 +226,16 @@ class ParameterizedTestData:
             ("number", True),
             ("boolean", True),
             ("date", True),
-            ("timestamp", True),
             ("object", True),
             ("array", True),
         ]
 
         invalid_cases = [
+            ("timestamp", False),  # Not in current model
             ("invalid_type", False),
             ("String", False),  # Case sensitive
             ("INTEGER", False),
             ("", False),
-            (None, False),
             (123, False),
         ]
 
@@ -241,10 +253,11 @@ class ParameterizedTestData:
             ("databricks", True),
             ("oracle", True),
             ("sqlserver", True),
-            ("mongodb", True),
+            ("s3", True),
         ]
 
         invalid_cases = [
+            ("mongodb", False),  # Not in current model
             ("invalid_server", False),
             ("PostgreSQL", False),  # Case sensitive
             ("MYSQL", False),

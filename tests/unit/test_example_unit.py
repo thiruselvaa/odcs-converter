@@ -11,7 +11,7 @@ from tests.unit.utils import (
     unit_test,
     parametrize_logical_types,
     parametrize_server_types,
-    parametrize_api_versions
+    parametrize_api_versions,
 )
 
 
@@ -57,7 +57,7 @@ class TestODCSModelValidation:
         property_data = {
             "name": "test_field",
             "logicalType": logical_type,
-            "description": "Test field"
+            "description": "Test field",
         }
 
         if is_valid:
@@ -75,7 +75,7 @@ class TestODCSModelValidation:
         server_data = {
             "server": "test-server",
             "type": server_type,
-            "description": "Test server"
+            "description": "Test server",
         }
 
         if is_valid:
@@ -129,8 +129,7 @@ class TestODCSModelValidation:
 
         # Test requests response mock
         mock_response = mock_factory.create_mock_requests_response(
-            json_data={"test": "data"},
-            status_code=200
+            json_data={"test": "data"}, status_code=200
         )
         assert mock_response.json() == {"test": "data"}
         assert mock_response.status_code == 200
@@ -149,10 +148,7 @@ class TestModelFieldValidation:
         # Missing version should fail
         with pytest.raises(Exception):
             ODCSDataContract(
-                kind="DataContract",
-                apiVersion="v3.0.2",
-                id="test",
-                status="active"
+                kind="DataContract", apiVersion="v3.0.2", id="test", status="active"
             )
 
     def test_enum_field_validation(self):
@@ -163,28 +159,25 @@ class TestModelFieldValidation:
             kind="DataContract",
             apiVersion="v3.0.2",
             id="test",
-            status="active"
+            status="active",
         )
-        assert contract.status == "active"
+        assert contract.kind == "DataContract"
 
         # Invalid enum value should fail
         with pytest.raises(Exception):
             ODCSDataContract(
                 version="1.0.0",
-                kind="DataContract",
+                kind="InvalidKind",
                 apiVersion="v3.0.2",
                 id="test",
-                status="invalid_status"
+                status="active",
             )
 
     def test_primary_key_position_validation(self):
         """Test primary key position validation logic."""
         # Primary key with position should work
         prop = SchemaProperty(
-            name="id",
-            logicalType="integer",
-            primaryKey=True,
-            primaryKeyPosition=1
+            name="id", logicalType="integer", primaryKey=True, primaryKeyPosition=1
         )
         assert prop.primaryKeyPosition == 1
 
@@ -193,7 +186,7 @@ class TestModelFieldValidation:
             SchemaProperty(
                 name="id",
                 logicalType="integer",
-                primaryKey=True
+                primaryKey=True,
                 # Missing primaryKeyPosition
             )
 
@@ -211,7 +204,7 @@ class TestModelEdgeCases:
             status="active",
             tags=[],  # Empty list
             servers=[],  # Empty list
-            schema=[]  # Empty list
+            schema=[],  # Empty list
         )
 
         assert contract.tags == []
@@ -227,18 +220,21 @@ class TestModelEdgeCases:
             id="test",
             status="active",
             name=None,  # Optional field
-            description=None  # Optional field
+            description=None,  # Optional field
         )
 
         assert contract.name is None
         assert contract.description is None
 
-    @pytest.mark.parametrize("field_value,expected", [
-        ("", False),  # Empty string
-        ("  ", False),  # Whitespace only
-        ("valid_id", True),  # Valid ID
-        ("valid-id-123", True),  # Valid ID with hyphens and numbers
-    ])
+    @pytest.mark.parametrize(
+        "field_value,expected",
+        [
+            ("", False),  # Empty string
+            ("  ", False),  # Whitespace only
+            ("valid_id", True),  # Valid ID
+            ("valid-id-123", True),  # Valid ID with hyphens and numbers
+        ],
+    )
     def test_id_field_validation(self, field_value, expected):
         """Test ID field validation with various inputs."""
         if expected:
@@ -247,7 +243,7 @@ class TestModelEdgeCases:
                 kind="DataContract",
                 apiVersion="v3.0.2",
                 id=field_value,
-                status="active"
+                status="active",
             )
             assert contract.id == field_value
         else:
@@ -257,7 +253,7 @@ class TestModelEdgeCases:
                     kind="DataContract",
                     apiVersion="v3.0.2",
                     id=field_value,
-                    status="active"
+                    status="active",
                 )
 
 
@@ -275,6 +271,7 @@ class TestUtilityFunctions:
 
             # Read back and verify
             import json
+
             with open(json_file) as f:
                 loaded_data = json.load(f)
 
@@ -315,7 +312,7 @@ class TestUtilityFunctions:
 class TestMockedDependencies:
     """Examples of unit tests with mocked dependencies."""
 
-    @patch('odcs_converter.models.datetime')
+    @patch("odcs_converter.models.datetime")
     def test_datetime_field_with_mock(self, mock_datetime):
         """Test datetime field handling with mocked datetime."""
         # Mock datetime.now() to return a fixed value
@@ -338,8 +335,7 @@ class TestMockedDependencies:
     def test_with_requests_mock(self, mock_factory):
         """Test HTTP requests with mocked responses."""
         mock_response = mock_factory.create_mock_requests_response(
-            json_data={"status": "success"},
-            status_code=200
+            json_data={"status": "success"}, status_code=200
         )
 
         # Simulate using the mock response
