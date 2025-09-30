@@ -17,8 +17,8 @@ from .models import ODCSDataContract
 logger = logging.getLogger(__name__)
 
 
-class ODCSExcelGenerator:
-    """Generate Excel files from ODCS JSON schema data."""
+class ODCSToExcelConverter:
+    """Convert ODCS JSON/YAML data to Excel format with separate worksheets."""
 
     def __init__(self, style_config: Optional[Dict[str, Any]] = None):
         """Initialize the generator with optional styling configuration.

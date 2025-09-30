@@ -3,16 +3,16 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "odcs-excel-generator"
-version = "0.1.0"
-description = "Generate Excel files from ODCS (Open Data Contract Standard) JSON schema with top-level fields in separate worksheets"
+name = "odcs-converter"
+version = "0.2.0"
+description = "Bidirectional converter between ODCS (Open Data Contract Standard) and Excel formats - convert ODCS JSON/YAML to Excel and Excel back to ODCS"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
     {name = "Thiruselva", email = "thiruselvaa@gmail.com"},
 ]
-keywords = ["odcs", "excel", "data-contract", "json-schema", "open-data"]
+keywords = ["odcs", "excel", "data-contract", "json-schema", "open-data", "yaml", "converter", "bidirectional"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -35,6 +35,8 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
     "typer>=0.9.0",
+    "pyyaml>=6.0.0",
+    "pandas>=2.0.0",
 ]
 
 [project.optional-dependencies]
@@ -56,16 +58,18 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/thiruselvaa/odcs-excel-generator"
-Documentation = "https://github.com/thiruselvaa/odcs-excel-generator#readme"
-Repository = "https://github.com/thiruselvaa/odcs-excel-generator"
-Issues = "https://github.com/thiruselvaa/odcs-excel-generator/issues"
+Homepage = "https://github.com/thiruselvaa/odcs-converter"
+Documentation = "https://github.com/thiruselvaa/odcs-converter#readme"
+Repository = "https://github.com/thiruselvaa/odcs-converter"
+Issues = "https://github.com/thiruselvaa/odcs-converter/issues"
 
 [project.scripts]
-odcs-excel = "odcs_excel_generator.cli:main"
+odcs-converter = "odcs_converter.cli:main"
+odcs-to-excel = "odcs_converter.cli:odcs_to_excel"
+excel-to-odcs = "odcs_converter.cli:excel_to_odcs"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/odcs_excel_generator"]
+packages = ["src/odcs_converter"]
 
 [tool.black]
 line-length = 88
