@@ -125,6 +125,9 @@ class ODCSToExcelConverter:
         self._create_description_sheet(workbook, data.get("description", {}))
         self._create_servers_sheet(workbook, data.get("servers", []))
         self._create_schema_sheet(workbook, data.get("schema", []))
+        self._create_schema_properties_sheet(workbook, data.get("schema", []))
+        self._create_logical_type_options_sheet(workbook, data.get("schema", []))
+        self._create_quality_rules_sheet(workbook, data.get("schema", []))
         self._create_support_sheet(workbook, data.get("support", []))
         self._create_pricing_sheet(workbook, data.get("price", {}))
         self._create_team_sheet(workbook, data.get("team", []))
@@ -267,6 +270,11 @@ class ODCSToExcelConverter:
             "Physical Type",
             "Description",
             "Business Name",
+            "Data Granularity",
+            "Tags",
+            "Quality Rules Count",
+            "Properties Count",
+            "Auth Definitions Count",
         ]
         for col, header in enumerate(headers, 1):
             cell = sheet.cell(row=1, column=col, value=header)
@@ -280,6 +288,15 @@ class ODCSToExcelConverter:
             sheet.cell(row=row, column=4, value=obj.get("physicalType", ""))
             sheet.cell(row=row, column=5, value=obj.get("description", ""))
             sheet.cell(row=row, column=6, value=obj.get("businessName", ""))
+            sheet.cell(
+                row=row, column=7, value=obj.get("dataGranularityDescription", "")
+            )
+            sheet.cell(row=row, column=8, value=", ".join(obj.get("tags", [])))
+            sheet.cell(row=row, column=9, value=len(obj.get("quality", [])))
+            sheet.cell(row=row, column=10, value=len(obj.get("properties", [])))
+            sheet.cell(
+                row=row, column=11, value=len(obj.get("authoritativeDefinitions", []))
+            )
 
         self._auto_adjust_columns(sheet)
 
@@ -393,6 +410,279 @@ class ODCSToExcelConverter:
 
         self._auto_adjust_columns(sheet)
 
+    def _create_schema_properties_sheet(
+        self, workbook: Workbook, schema: List[Dict[str, Any]]
+    ) -> None:
+        """Create Schema Properties worksheet with detailed property information."""
+        sheet = workbook.create_sheet("Schema Properties")
+
+        # Collect all properties from all schema objects
+        all_properties = []
+        for obj in schema:
+            obj_name = obj.get("name", "")
+            for prop in obj.get("properties", []):
+                prop_with_object = {"object_name": obj_name, **prop}
+                all_properties.append(prop_with_object)
+
+        if not all_properties:
+            sheet.cell(row=1, column=1, value="No schema properties defined")
+            return
+
+        # Add headers
+        headers = [
+            "Object Name",
+            "Property Name",
+            "Logical Type",
+            "Physical Type",
+            "Physical Name",
+            "Description",
+            "Business Name",
+            "Required",
+            "Unique",
+            "Primary Key",
+            "PK Position",
+            "Partitioned",
+            "Partition Position",
+            "Classification",
+            "Encrypted Name",
+            "Critical Data Element",
+            "Transform Sources",
+            "Transform Logic",
+            "Transform Description",
+            "Examples",
+            "Tags",
+            "Quality Rules Count",
+            "Auth Definitions Count",
+        ]
+        for col, header in enumerate(headers, 1):
+            cell = sheet.cell(row=1, column=col, value=header)
+            self._apply_header_style(cell)
+
+        # Add properties
+        for row, prop in enumerate(all_properties, 2):
+            sheet.cell(row=row, column=1, value=prop.get("object_name", ""))
+            sheet.cell(row=row, column=2, value=prop.get("name", ""))
+            sheet.cell(row=row, column=3, value=prop.get("logicalType", ""))
+            sheet.cell(row=row, column=4, value=prop.get("physicalType", ""))
+            sheet.cell(row=row, column=5, value=prop.get("physicalName", ""))
+            sheet.cell(row=row, column=6, value=prop.get("description", ""))
+            sheet.cell(row=row, column=7, value=prop.get("businessName", ""))
+            sheet.cell(row=row, column=8, value=prop.get("required", False))
+            sheet.cell(row=row, column=9, value=prop.get("unique", False))
+            sheet.cell(row=row, column=10, value=prop.get("primaryKey", False))
+            sheet.cell(row=row, column=11, value=prop.get("primaryKeyPosition", -1))
+            sheet.cell(row=row, column=12, value=prop.get("partitioned", False))
+            sheet.cell(row=row, column=13, value=prop.get("partitionKeyPosition", -1))
+            sheet.cell(row=row, column=14, value=prop.get("classification", ""))
+            sheet.cell(row=row, column=15, value=prop.get("encryptedName", ""))
+            sheet.cell(row=row, column=16, value=prop.get("criticalDataElement", False))
+            sheet.cell(
+                row=row,
+                column=17,
+                value=", ".join(prop.get("transformSourceObjects", [])),
+            )
+            sheet.cell(row=row, column=18, value=prop.get("transformLogic", ""))
+            sheet.cell(row=row, column=19, value=prop.get("transformDescription", ""))
+            sheet.cell(
+                row=row, column=20, value=", ".join(map(str, prop.get("examples", [])))
+            )
+            sheet.cell(row=row, column=21, value=", ".join(prop.get("tags", [])))
+            sheet.cell(row=row, column=22, value=len(prop.get("quality", [])))
+            sheet.cell(
+                row=row, column=23, value=len(prop.get("authoritativeDefinitions", []))
+            )
+
+        self._auto_adjust_columns(sheet)
+
+    def _create_logical_type_options_sheet(
+        self, workbook: Workbook, schema: List[Dict[str, Any]]
+    ) -> None:
+        """Create Logical Type Options worksheet."""
+        sheet = workbook.create_sheet("Logical Type Options")
+
+        # Collect all properties with logical type options
+        options_data = []
+        for obj in schema:
+            obj_name = obj.get("name", "")
+            for prop in obj.get("properties", []):
+                if prop.get("logicalTypeOptions"):
+                    options = prop["logicalTypeOptions"]
+                    options_data.append(
+                        {
+                            "object_name": obj_name,
+                            "property_name": prop.get("name", ""),
+                            "logical_type": prop.get("logicalType", ""),
+                            **options,
+                        }
+                    )
+
+        if not options_data:
+            sheet.cell(row=1, column=1, value="No logical type options defined")
+            return
+
+        # Add headers
+        headers = [
+            "Object Name",
+            "Property Name",
+            "Logical Type",
+            "Format",
+            "Min Length",
+            "Max Length",
+            "Pattern",
+            "Minimum",
+            "Maximum",
+            "Exclusive Minimum",
+            "Exclusive Maximum",
+            "Multiple Of",
+            "Min Items",
+            "Max Items",
+            "Unique Items",
+            "Min Properties",
+            "Max Properties",
+            "Required Properties",
+        ]
+        for col, header in enumerate(headers, 1):
+            cell = sheet.cell(row=1, column=col, value=header)
+            self._apply_header_style(cell)
+
+        # Add options data
+        for row, options in enumerate(options_data, 2):
+            sheet.cell(row=row, column=1, value=options.get("object_name", ""))
+            sheet.cell(row=row, column=2, value=options.get("property_name", ""))
+            sheet.cell(row=row, column=3, value=options.get("logical_type", ""))
+            sheet.cell(row=row, column=4, value=options.get("format", ""))
+            sheet.cell(row=row, column=5, value=options.get("minLength", ""))
+            sheet.cell(row=row, column=6, value=options.get("maxLength", ""))
+            sheet.cell(row=row, column=7, value=options.get("pattern", ""))
+            sheet.cell(row=row, column=8, value=options.get("minimum", ""))
+            sheet.cell(row=row, column=9, value=options.get("maximum", ""))
+            sheet.cell(row=row, column=10, value=options.get("exclusiveMinimum", ""))
+            sheet.cell(row=row, column=11, value=options.get("exclusiveMaximum", ""))
+            sheet.cell(row=row, column=12, value=options.get("multipleOf", ""))
+            sheet.cell(row=row, column=13, value=options.get("minItems", ""))
+            sheet.cell(row=row, column=14, value=options.get("maxItems", ""))
+            sheet.cell(row=row, column=15, value=options.get("uniqueItems", ""))
+            sheet.cell(row=row, column=16, value=options.get("minProperties", ""))
+            sheet.cell(row=row, column=17, value=options.get("maxProperties", ""))
+            sheet.cell(row=row, column=18, value=", ".join(options.get("required", [])))
+
+        self._auto_adjust_columns(sheet)
+
+    def _create_quality_rules_sheet(
+        self, workbook: Workbook, schema: List[Dict[str, Any]]
+    ) -> None:
+        """Create Quality Rules worksheet."""
+        sheet = workbook.create_sheet("Quality Rules")
+
+        # Collect all quality rules from objects and properties
+        all_rules = []
+        for obj in schema:
+            obj_name = obj.get("name", "")
+
+            # Object-level quality rules
+            for rule in obj.get("quality", []):
+                rule_with_context = {
+                    "object_name": obj_name,
+                    "property_name": "",
+                    "level": "object",
+                    **rule,
+                }
+                all_rules.append(rule_with_context)
+
+            # Property-level quality rules
+            for prop in obj.get("properties", []):
+                prop_name = prop.get("name", "")
+                for rule in prop.get("quality", []):
+                    rule_with_context = {
+                        "object_name": obj_name,
+                        "property_name": prop_name,
+                        "level": "property",
+                        **rule,
+                    }
+                    all_rules.append(rule_with_context)
+
+        if not all_rules:
+            sheet.cell(row=1, column=1, value="No quality rules defined")
+            return
+
+        # Add headers
+        headers = [
+            "Object Name",
+            "Property Name",
+            "Level",
+            "Name",
+            "Description",
+            "Type",
+            "Rule",
+            "Dimension",
+            "Severity",
+            "Business Impact",
+            "Unit",
+            "Valid Values",
+            "Query",
+            "Engine",
+            "Implementation",
+            "Must Be",
+            "Must Not Be",
+            "Must Be Greater Than",
+            "Must Be Greater Or Equal",
+            "Must Be Less Than",
+            "Must Be Less Or Equal",
+            "Must Be Between",
+            "Must Not Be Between",
+            "Method",
+            "Scheduler",
+            "Schedule",
+            "Tags",
+        ]
+        for col, header in enumerate(headers, 1):
+            cell = sheet.cell(row=1, column=col, value=header)
+            self._apply_header_style(cell)
+
+        # Add quality rules
+        for row, rule in enumerate(all_rules, 2):
+            sheet.cell(row=row, column=1, value=rule.get("object_name", ""))
+            sheet.cell(row=row, column=2, value=rule.get("property_name", ""))
+            sheet.cell(row=row, column=3, value=rule.get("level", ""))
+            sheet.cell(row=row, column=4, value=rule.get("name", ""))
+            sheet.cell(row=row, column=5, value=rule.get("description", ""))
+            sheet.cell(row=row, column=6, value=rule.get("type", ""))
+            sheet.cell(row=row, column=7, value=rule.get("rule", ""))
+            sheet.cell(row=row, column=8, value=rule.get("dimension", ""))
+            sheet.cell(row=row, column=9, value=rule.get("severity", ""))
+            sheet.cell(row=row, column=10, value=rule.get("businessImpact", ""))
+            sheet.cell(row=row, column=11, value=rule.get("unit", ""))
+            sheet.cell(
+                row=row,
+                column=12,
+                value=", ".join(map(str, rule.get("validValues", []))),
+            )
+            sheet.cell(row=row, column=13, value=rule.get("query", ""))
+            sheet.cell(row=row, column=14, value=rule.get("engine", ""))
+            sheet.cell(row=row, column=15, value=rule.get("implementation", ""))
+            sheet.cell(row=row, column=16, value=rule.get("mustBe", ""))
+            sheet.cell(row=row, column=17, value=rule.get("mustNotBe", ""))
+            sheet.cell(row=row, column=18, value=rule.get("mustBeGreaterThan", ""))
+            sheet.cell(row=row, column=19, value=rule.get("mustBeGreaterOrEqualTo", ""))
+            sheet.cell(row=row, column=20, value=rule.get("mustBeLessThan", ""))
+            sheet.cell(row=row, column=21, value=rule.get("mustBeLessOrEqualTo", ""))
+            sheet.cell(
+                row=row,
+                column=22,
+                value=", ".join(map(str, rule.get("mustBeBetween", []))),
+            )
+            sheet.cell(
+                row=row,
+                column=23,
+                value=", ".join(map(str, rule.get("mustNotBeBetween", []))),
+            )
+            sheet.cell(row=row, column=24, value=rule.get("method", ""))
+            sheet.cell(row=row, column=25, value=rule.get("scheduler", ""))
+            sheet.cell(row=row, column=26, value=rule.get("schedule", ""))
+            sheet.cell(row=row, column=27, value=", ".join(rule.get("tags", [])))
+
+        self._auto_adjust_columns(sheet)
+
     def _create_sla_properties_sheet(
         self, workbook: Workbook, sla_properties: List[Dict[str, Any]]
     ) -> None:
@@ -404,7 +694,7 @@ class ODCSToExcelConverter:
             return
 
         # Add headers
-        headers = ["Property", "Value", "Unit", "Element", "Driver"]
+        headers = ["Property", "Value", "Value Ext", "Unit", "Element", "Driver"]
         for col, header in enumerate(headers, 1):
             cell = sheet.cell(row=1, column=col, value=header)
             self._apply_header_style(cell)
@@ -413,9 +703,10 @@ class ODCSToExcelConverter:
         for row, prop in enumerate(sla_properties, 2):
             sheet.cell(row=row, column=1, value=prop.get("property", ""))
             sheet.cell(row=row, column=2, value=str(prop.get("value", "")))
-            sheet.cell(row=row, column=3, value=prop.get("unit", ""))
-            sheet.cell(row=row, column=4, value=prop.get("element", ""))
-            sheet.cell(row=row, column=5, value=prop.get("driver", ""))
+            sheet.cell(row=row, column=3, value=str(prop.get("valueExt", "")))
+            sheet.cell(row=row, column=4, value=prop.get("unit", ""))
+            sheet.cell(row=row, column=5, value=prop.get("element", ""))
+            sheet.cell(row=row, column=6, value=prop.get("driver", ""))
 
         self._auto_adjust_columns(sheet)
 
