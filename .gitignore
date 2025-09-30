@@ -49,6 +49,20 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Test artifacts and outputs
+tests/logs/
+tests/reports/
+tests/outputs/
+tests/unit/outputs/
+tests/integration/outputs/
+tests/end_to_end/outputs/
+junit/
+.pytest_cache/
+test_*.xlsx
+test_*.json
+test_*.yaml
+*_test_output.*
+
 # Translations
 *.mo
 *.pot
@@ -141,9 +155,12 @@ cython_debug/
 # VS Code
 .vscode/
 
-# Excel files (for testing)
-*.xlsx
-*.xls
+# Excel files (temporary test files)
+**/outputs/*.xlsx
+**/outputs/*.xls
+test_output.xlsx
+~$*.xlsx
+~$*.xls
 
 # macOS
 .DS_Store
