@@ -4,6 +4,49 @@ This directory contains utility scripts for development, testing, and maintenanc
 
 ## 📋 Available Scripts
 
+### logging_demo.py
+
+**Purpose**: Comprehensive demonstration of the logging system with all features
+
+**Usage**:
+```bash
+# Run via Makefile (recommended)
+make logs-demo
+
+# Or run directly
+ODCS_ENV=local uv run python scripts/logging_demo.py
+
+# Try different environments
+ODCS_ENV=dev uv run python scripts/logging_demo.py
+ODCS_ENV=prod uv run python scripts/logging_demo.py
+```
+
+**Description**:
+Demonstrates all logging features of the ODCS Converter including:
+- Environment-specific logging configurations
+- Correlation ID tracking across operations
+- Performance monitoring and metrics
+- Structured logging with JSON output
+- Log rotation and retention
+- Different log levels and formats
+- Rich console output with formatting
+- File-based logging to multiple destinations
+
+**Output**:
+Creates log files in the `demo_logs/` directory:
+- `odcs-converter-YYYYMMDD.log` - Main application log
+- `odcs-converter-error-YYYYMMDD.log` - Error-only log
+- `odcs-converter-structured-YYYYMMDD.jsonl` - Structured JSON logs
+
+**When to use**:
+- Learning how the logging system works
+- Testing logging configurations
+- Debugging logging issues
+- Demonstrating logging capabilities
+- Validating log output formats
+
+---
+
 ### setup_tests.py
 
 **Purpose**: Initialize and set up the test directory structure
@@ -78,6 +121,9 @@ python scripts/setup_tests.py
 
 # 2. Run all checks to verify setup
 ./scripts/run_checks.sh
+
+# 3. Try the logging demo
+make logs-demo
 ```
 
 ### Daily Development Workflow
@@ -92,6 +138,22 @@ python scripts/setup_tests.py
 git add .
 git commit -m "Your commit message"
 git push
+```
+
+### Testing Logging Changes
+
+```bash
+# 1. Run the logging demo
+make logs-demo
+
+# 2. Check generated logs
+ls -la demo_logs/
+
+# 3. Analyze structured logs
+make logs-analyze
+
+# 4. Clean up logs
+make logs-clean
 ```
 
 ## 📝 Adding New Scripts
@@ -293,6 +355,6 @@ If you encounter issues with scripts:
 
 ---
 
-**Last Updated**: 2025-01-26
+**Last Updated**: 2025-09-30
 **Maintainer**: Thiruselva
 **Project**: ODCS Converter
