@@ -2,12 +2,11 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Union
 from datetime import datetime
 
 import pandas as pd
 from openpyxl import load_workbook
-from openpyxl.worksheet.worksheet import Worksheet
 
 from .models import ODCSDataContract
 
@@ -67,14 +66,16 @@ class ExcelToODCSParser:
                 headers = []
 
                 # Get headers from first row
-                first_row = next(sheet.iter_rows(min_row=1, max_row=1, values_only=True), None)
+                first_row = next(
+                    sheet.iter_rows(min_row=1, max_row=1, values_only=True), None
+                )
                 if first_row:
                     headers = [cell for cell in first_row if cell is not None]
 
                 # Get data from subsequent rows
                 for row in sheet.iter_rows(min_row=2, values_only=True):
                     if any(cell is not None for cell in row):  # Skip empty rows
-                        row_data = list(row[:len(headers)] if headers else row)
+                        row_data = list(row[: len(headers)] if headers else row)
                         data.append(row_data)
 
                 # Create DataFrame
@@ -85,7 +86,7 @@ class ExcelToODCSParser:
                 else:
                     df = pd.DataFrame()
                 # Convert empty strings to None for better data handling
-                df = df.where(df != '', None)
+                df = df.where(df != "", None)
                 self.worksheets[sheet_name] = df
                 logger.debug(f"Loaded worksheet '{sheet_name}' with {len(df)} rows")
             except Exception as e:
@@ -122,21 +123,23 @@ class ExcelToODCSParser:
             return {}
 
         df = self.worksheets[sheet_name]
-        if df.empty or 'Field' not in df.columns or 'Value' not in df.columns:
+        if df.empty or "Field" not in df.columns or "Value" not in df.columns:
             return {}
 
         data = {}
         for _, row in df.iterrows():
-            field = row.get('Field')
-            value = row.get('Value')
+            field = row.get("Field")
+            value = row.get("Value")
 
             if field and value is not None:
                 # Handle special field mappings
-                if field == 'contractCreatedTs' and value:
+                if field == "contractCreatedTs" and value:
                     try:
                         # Try to parse datetime if it's a string
                         if isinstance(value, str):
-                            data[field] = datetime.fromisoformat(value.replace('Z', '+00:00')).isoformat()
+                            data[field] = datetime.fromisoformat(
+                                value.replace("Z", "+00:00")
+                            ).isoformat()
                         else:
                             data[field] = value
                     except (ValueError, AttributeError):
@@ -153,16 +156,16 @@ class ExcelToODCSParser:
             return {}
 
         df = self.worksheets[sheet_name]
-        if df.empty or 'Tag' not in df.columns:
+        if df.empty or "Tag" not in df.columns:
             return {}
 
         tags = []
         for _, row in df.iterrows():
-            tag = row.get('Tag')
+            tag = row.get("Tag")
             if tag:
                 tags.append(str(tag))
 
-        return {'tags': tags} if tags else {}
+        return {"tags": tags} if tags else {}
 
     def _parse_description(self) -> Dict[str, Any]:
         """Parse Description worksheet."""
@@ -171,18 +174,18 @@ class ExcelToODCSParser:
             return {}
 
         df = self.worksheets[sheet_name]
-        if df.empty or 'Field' not in df.columns or 'Value' not in df.columns:
+        if df.empty or "Field" not in df.columns or "Value" not in df.columns:
             return {}
 
         description = {}
         for _, row in df.iterrows():
-            field = row.get('Field')
-            value = row.get('Value')
+            field = row.get("Field")
+            value = row.get("Value")
 
             if field and value is not None:
                 description[field] = str(value)
 
-        return {'description': description} if description else {}
+        return {"description": description} if description else {}
 
     def _parse_servers(self) -> Dict[str, Any]:
         """Parse Servers worksheet."""
@@ -200,24 +203,24 @@ class ExcelToODCSParser:
 
             # Map common server fields
             field_mappings = {
-                'Server': 'server',
-                'Type': 'type',
-                'Description': 'description',
-                'Environment': 'environment',
-                'Location': 'location',
-                'Host': 'host',
-                'Port': 'port',
-                'Database': 'database',
-                'Schema': 'schema',
-                'Project': 'project',
-                'Catalog': 'catalog',
-                'Format': 'format'
+                "Server": "server",
+                "Type": "type",
+                "Description": "description",
+                "Environment": "environment",
+                "Location": "location",
+                "Host": "host",
+                "Port": "port",
+                "Database": "database",
+                "Schema": "schema",
+                "Project": "project",
+                "Catalog": "catalog",
+                "Format": "format",
             }
 
             for excel_field, odcs_field in field_mappings.items():
                 value = row.get(excel_field)
-                if value is not None and value != '':
-                    if odcs_field == 'port':
+                if value is not None and value != "":
+                    if odcs_field == "port":
                         try:
                             server[odcs_field] = int(value)
                         except (ValueError, TypeError):
@@ -228,7 +231,7 @@ class ExcelToODCSParser:
             if server:  # Only add if we have some data
                 servers.append(server)
 
-        return {'servers': servers} if servers else {}
+        return {"servers": servers} if servers else {}
 
     def _parse_schema(self) -> Dict[str, Any]:
         """Parse Schema worksheet."""
@@ -246,23 +249,23 @@ class ExcelToODCSParser:
 
             # Map schema object fields
             field_mappings = {
-                'Object Name': 'name',
-                'Physical Name': 'physicalName',
-                'Logical Type': 'logicalType',
-                'Physical Type': 'physicalType',
-                'Description': 'description',
-                'Business Name': 'businessName'
+                "Object Name": "name",
+                "Physical Name": "physicalName",
+                "Logical Type": "logicalType",
+                "Physical Type": "physicalType",
+                "Description": "description",
+                "Business Name": "businessName",
             }
 
             for excel_field, odcs_field in field_mappings.items():
                 value = row.get(excel_field)
-                if value is not None and value != '':
+                if value is not None and value != "":
                     schema_obj[odcs_field] = str(value)
 
             if schema_obj:  # Only add if we have some data
                 schema_objects.append(schema_obj)
 
-        return {'schema': schema_objects} if schema_objects else {}
+        return {"schema": schema_objects} if schema_objects else {}
 
     def _parse_support(self) -> Dict[str, Any]:
         """Parse Support worksheet."""
@@ -279,22 +282,22 @@ class ExcelToODCSParser:
             support_item = {}
 
             field_mappings = {
-                'Channel': 'channel',
-                'URL': 'url',
-                'Description': 'description',
-                'Tool': 'tool',
-                'Scope': 'scope'
+                "Channel": "channel",
+                "URL": "url",
+                "Description": "description",
+                "Tool": "tool",
+                "Scope": "scope",
             }
 
             for excel_field, odcs_field in field_mappings.items():
                 value = row.get(excel_field)
-                if value is not None and value != '':
+                if value is not None and value != "":
                     support_item[odcs_field] = str(value)
 
             if support_item:
                 support_items.append(support_item)
 
-        return {'support': support_items} if support_items else {}
+        return {"support": support_items} if support_items else {}
 
     def _parse_pricing(self) -> Dict[str, Any]:
         """Parse Pricing worksheet."""
@@ -303,16 +306,16 @@ class ExcelToODCSParser:
             return {}
 
         df = self.worksheets[sheet_name]
-        if df.empty or 'Field' not in df.columns or 'Value' not in df.columns:
+        if df.empty or "Field" not in df.columns or "Value" not in df.columns:
             return {}
 
         pricing = {}
         for _, row in df.iterrows():
-            field = row.get('Field')
-            value = row.get('Value')
+            field = row.get("Field")
+            value = row.get("Value")
 
             if field and value is not None:
-                if field == 'priceAmount':
+                if field == "priceAmount":
                     try:
                         pricing[field] = float(value)
                     except (ValueError, TypeError):
@@ -320,7 +323,7 @@ class ExcelToODCSParser:
                 else:
                     pricing[field] = str(value)
 
-        return {'price': pricing} if pricing else {}
+        return {"price": pricing} if pricing else {}
 
     def _parse_team(self) -> Dict[str, Any]:
         """Parse Team worksheet."""
@@ -337,23 +340,23 @@ class ExcelToODCSParser:
             member = {}
 
             field_mappings = {
-                'Username': 'username',
-                'Name': 'name',
-                'Role': 'role',
-                'Description': 'description',
-                'Date In': 'dateIn',
-                'Date Out': 'dateOut'
+                "Username": "username",
+                "Name": "name",
+                "Role": "role",
+                "Description": "description",
+                "Date In": "dateIn",
+                "Date Out": "dateOut",
             }
 
             for excel_field, odcs_field in field_mappings.items():
                 value = row.get(excel_field)
-                if value is not None and value != '':
+                if value is not None and value != "":
                     member[odcs_field] = str(value)
 
             if member:
                 team_members.append(member)
 
-        return {'team': team_members} if team_members else {}
+        return {"team": team_members} if team_members else {}
 
     def _parse_roles(self) -> Dict[str, Any]:
         """Parse Roles worksheet."""
@@ -370,22 +373,22 @@ class ExcelToODCSParser:
             role = {}
 
             field_mappings = {
-                'Role': 'role',
-                'Description': 'description',
-                'Access': 'access',
-                'First Level Approvers': 'firstLevelApprovers',
-                'Second Level Approvers': 'secondLevelApprovers'
+                "Role": "role",
+                "Description": "description",
+                "Access": "access",
+                "First Level Approvers": "firstLevelApprovers",
+                "Second Level Approvers": "secondLevelApprovers",
             }
 
             for excel_field, odcs_field in field_mappings.items():
                 value = row.get(excel_field)
-                if value is not None and value != '':
+                if value is not None and value != "":
                     role[odcs_field] = str(value)
 
             if role:
                 roles.append(role)
 
-        return {'roles': roles} if roles else {}
+        return {"roles": roles} if roles else {}
 
     def _parse_sla_properties(self) -> Dict[str, Any]:
         """Parse SLA Properties worksheet."""
@@ -402,17 +405,17 @@ class ExcelToODCSParser:
             sla_prop = {}
 
             field_mappings = {
-                'Property': 'property',
-                'Value': 'value',
-                'Unit': 'unit',
-                'Element': 'element',
-                'Driver': 'driver'
+                "Property": "property",
+                "Value": "value",
+                "Unit": "unit",
+                "Element": "element",
+                "Driver": "driver",
             }
 
             for excel_field, odcs_field in field_mappings.items():
                 value = row.get(excel_field)
-                if value is not None and value != '':
-                    if odcs_field == 'value':
+                if value is not None and value != "":
+                    if odcs_field == "value":
                         # Try to convert to appropriate type
                         sla_prop[odcs_field] = self._convert_value(value)
                     else:
@@ -421,7 +424,7 @@ class ExcelToODCSParser:
             if sla_prop:
                 sla_properties.append(sla_prop)
 
-        return {'slaProperties': sla_properties} if sla_properties else {}
+        return {"slaProperties": sla_properties} if sla_properties else {}
 
     def _parse_authoritative_definitions(self) -> Dict[str, Any]:
         """Parse Authoritative Definitions worksheet."""
@@ -437,18 +440,18 @@ class ExcelToODCSParser:
         for _, row in df.iterrows():
             definition = {}
 
-            url = row.get('URL')
-            type_val = row.get('Type')
+            url = row.get("URL")
+            type_val = row.get("Type")
 
-            if url and url != '':
-                definition['url'] = str(url)
-            if type_val and type_val != '':
-                definition['type'] = str(type_val)
+            if url and url != "":
+                definition["url"] = str(url)
+            if type_val and type_val != "":
+                definition["type"] = str(type_val)
 
             if definition:
                 definitions.append(definition)
 
-        return {'authoritativeDefinitions': definitions} if definitions else {}
+        return {"authoritativeDefinitions": definitions} if definitions else {}
 
     def _parse_custom_properties(self) -> Dict[str, Any]:
         """Parse Custom Properties worksheet."""
@@ -457,25 +460,24 @@ class ExcelToODCSParser:
             return {}
 
         df = self.worksheets[sheet_name]
-        if df.empty or 'Property' not in df.columns or 'Value' not in df.columns:
+        if df.empty or "Property" not in df.columns or "Value" not in df.columns:
             return {}
 
         custom_properties = []
         for _, row in df.iterrows():
-            prop = row.get('Property')
-            value = row.get('Value')
+            prop = row.get("Property")
+            value = row.get("Value")
 
             if prop and value is not None:
-                custom_properties.append({
-                    'property': str(prop),
-                    'value': self._convert_value(value)
-                })
+                custom_properties.append(
+                    {"property": str(prop), "value": self._convert_value(value)}
+                )
 
-        return {'customProperties': custom_properties} if custom_properties else {}
+        return {"customProperties": custom_properties} if custom_properties else {}
 
     def _convert_value(self, value: Any) -> Any:
         """Convert Excel value to appropriate Python type."""
-        if value is None or value == '':
+        if value is None or value == "":
             return None
 
         # If it's already a basic type, return as-is
@@ -485,19 +487,19 @@ class ExcelToODCSParser:
         value_str = str(value).strip()
 
         # Try boolean
-        if value_str.lower() in ('true', 'false'):
-            return value_str.lower() == 'true'
+        if value_str.lower() in ("true", "false"):
+            return value_str.lower() == "true"
 
         # Try integer
         try:
-            if '.' not in value_str and value_str.isdigit():
+            if "." not in value_str and value_str.isdigit():
                 return int(value_str)
         except (ValueError, AttributeError):
             pass
 
         # Try float
         try:
-            if '.' in value_str:
+            if "." in value_str:
                 return float(value_str)
         except (ValueError, AttributeError):
             pass
@@ -523,11 +525,11 @@ class ExcelToODCSParser:
                         cleaned_item = self._clean_data(item)
                         if cleaned_item:
                             cleaned_list.append(cleaned_item)
-                    elif item is not None and item != '':
+                    elif item is not None and item != "":
                         cleaned_list.append(item)
                 if cleaned_list:  # Only add non-empty lists
                     cleaned[key] = cleaned_list
-            elif value != '' and value is not None:
+            elif value != "" and value is not None:
                 cleaned[key] = value
 
         return cleaned

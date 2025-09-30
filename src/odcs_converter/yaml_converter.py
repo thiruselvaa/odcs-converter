@@ -29,7 +29,7 @@ class YAMLConverter:
             # Ensure parent directory exists
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 yaml.dump(
                     data,
                     f,
@@ -37,7 +37,7 @@ class YAMLConverter:
                     sort_keys=False,
                     indent=2,
                     width=120,
-                    allow_unicode=True
+                    allow_unicode=True,
                 )
 
             logger.info(f"YAML file written successfully: {output_path}")
@@ -66,11 +66,13 @@ class YAMLConverter:
             raise FileNotFoundError(f"YAML file not found: {yaml_path}")
 
         try:
-            with open(yaml_path, 'r', encoding='utf-8') as f:
+            with open(yaml_path, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f)
 
             if not isinstance(data, dict):
-                raise ValueError("YAML file must contain a dictionary/object at root level")
+                raise ValueError(
+                    "YAML file must contain a dictionary/object at root level"
+                )
 
             logger.info(f"YAML file loaded successfully: {yaml_path}")
             return data
@@ -102,7 +104,7 @@ class YAMLConverter:
                 sort_keys=False,
                 indent=2,
                 width=120,
-                allow_unicode=True
+                allow_unicode=True,
             )
         except Exception as e:
             logger.error(f"Failed to serialize data to YAML string: {e}")
@@ -125,7 +127,9 @@ class YAMLConverter:
             data = yaml.safe_load(yaml_string)
 
             if not isinstance(data, dict):
-                raise ValueError("YAML string must contain a dictionary/object at root level")
+                raise ValueError(
+                    "YAML string must contain a dictionary/object at root level"
+                )
 
             return data
 
@@ -147,10 +151,12 @@ class YAMLConverter:
             True if file has YAML extension (.yaml or .yml)
         """
         file_path = Path(file_path)
-        return file_path.suffix.lower() in ['.yaml', '.yml']
+        return file_path.suffix.lower() in [".yaml", ".yml"]
 
     @staticmethod
-    def normalize_yaml_extension(file_path: Union[str, Path], prefer_yaml: bool = True) -> Path:
+    def normalize_yaml_extension(
+        file_path: Union[str, Path], prefer_yaml: bool = True
+    ) -> Path:
         """Normalize YAML file extension.
 
         Args:
@@ -162,9 +168,9 @@ class YAMLConverter:
         """
         file_path = Path(file_path)
 
-        if file_path.suffix.lower() in ['.yaml', '.yml']:
+        if file_path.suffix.lower() in [".yaml", ".yml"]:
             return file_path
 
         # Add appropriate YAML extension
-        extension = '.yaml' if prefer_yaml else '.yml'
+        extension = ".yaml" if prefer_yaml else ".yml"
         return file_path.with_suffix(extension)

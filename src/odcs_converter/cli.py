@@ -24,7 +24,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(message)s",
     datefmt="[%X]",
-    handlers=[RichHandler(console=console, rich_tracebacks=True)]
+    handlers=[RichHandler(console=console, rich_tracebacks=True)],
 )
 
 logger = logging.getLogger(__name__)
@@ -43,14 +43,14 @@ def _detect_file_type(file_path: str) -> str:
     path = Path(file_path)
     suffix = path.suffix.lower()
 
-    if suffix in ['.xlsx', '.xls']:
-        return 'excel'
-    elif suffix in ['.yaml', '.yml']:
-        return 'yaml'
-    elif suffix == '.json':
-        return 'json'
+    if suffix in [".xlsx", ".xls"]:
+        return "excel"
+    elif suffix in [".yaml", ".yml"]:
+        return "yaml"
+    elif suffix == ".json":
+        return "json"
     else:
-        return 'unknown'
+        return "unknown"
 
 
 @click.command()
@@ -59,32 +59,19 @@ def _detect_file_type(file_path: str) -> str:
 @click.option(
     "--format",
     "-f",
-    type=click.Choice(['json', 'yaml', 'excel'], case_sensitive=False),
-    help="Output format (auto-detected from file extension if not specified)"
+    type=click.Choice(["json", "yaml", "excel"], case_sensitive=False),
+    help="Output format (auto-detected from file extension if not specified)",
 )
 @click.option(
-    "--config",
-    "-c",
-    type=click.Path(exists=True),
-    help="Path to configuration file"
+    "--config", "-c", type=click.Path(exists=True), help="Path to configuration file"
 )
 @click.option(
     "--validate",
     is_flag=True,
-    help="Validate against ODCS schema (for JSON/YAML output)"
+    help="Validate against ODCS schema (for JSON/YAML output)",
 )
-@click.option(
-    "--verbose",
-    "-v",
-    is_flag=True,
-    help="Enable verbose logging"
-)
-@click.option(
-    "--quiet",
-    "-q",
-    is_flag=True,
-    help="Suppress output except errors"
-)
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose logging")
+@click.option("--quiet", "-q", is_flag=True, help="Suppress output except errors")
 def main(
     input_source: str,
     output_file: str,
@@ -128,7 +115,7 @@ def main(
     try:
         # Detect input and output types
         is_url = input_source.startswith(("http://", "https://"))
-        input_type = 'url' if is_url else _detect_file_type(input_source)
+        input_type = "url" if is_url else _detect_file_type(input_source)
 
         # Determine output format
         if format:
@@ -136,19 +123,23 @@ def main(
         else:
             output_format = _detect_file_type(output_file)
 
-        if output_format == 'unknown':
-            console.print("❌ [bold red]Error:[/bold red] Cannot determine output format. Use --format option.")
+        if output_format == "unknown":
+            console.print(
+                "❌ [bold red]Error:[/bold red] Cannot determine output format. Use --format option."
+            )
             sys.exit(1)
 
         # Determine conversion direction
-        if input_type in ['json', 'yaml', 'url'] and output_format == 'excel':
+        if input_type in ["json", "yaml", "url"] and output_format == "excel":
             # ODCS to Excel conversion
             _odcs_to_excel(input_source, output_file, config, is_url)
-        elif input_type == 'excel' and output_format in ['json', 'yaml']:
+        elif input_type == "excel" and output_format in ["json", "yaml"]:
             # Excel to ODCS conversion
             _excel_to_odcs(input_source, output_file, output_format, validate)
         else:
-            console.print(f"❌ [bold red]Error:[/bold red] Unsupported conversion: {input_type} → {output_format}")
+            console.print(
+                f"❌ [bold red]Error:[/bold red] Unsupported conversion: {input_type} → {output_format}"
+            )
             sys.exit(1)
 
     except FileNotFoundError as e:
@@ -163,7 +154,9 @@ def main(
         sys.exit(1)
 
 
-def _odcs_to_excel(input_source: str, output_file: str, config: Optional[str], is_url: bool) -> None:
+def _odcs_to_excel(
+    input_source: str, output_file: str, config: Optional[str], is_url: bool
+) -> None:
     """Convert ODCS to Excel format."""
     # Load configuration if provided
     style_config = None
@@ -186,7 +179,7 @@ def _odcs_to_excel(input_source: str, output_file: str, config: Optional[str], i
             converter.generate_from_url(input_source, output_file)
         else:
             task = progress.add_task("Processing ODCS file...", total=None)
-            if _detect_file_type(input_source) == 'yaml':
+            if _detect_file_type(input_source) == "yaml":
                 # Load YAML and convert to dict first
                 yaml_data = YAMLConverter.yaml_to_dict(input_source)
                 converter.generate_from_dict(yaml_data, output_file)
@@ -195,10 +188,14 @@ def _odcs_to_excel(input_source: str, output_file: str, config: Optional[str], i
 
         progress.update(task, description="Generating Excel file...")
 
-    console.print(f"✅ Excel file generated successfully: [bold green]{output_file}[/bold green]")
+    console.print(
+        f"✅ Excel file generated successfully: [bold green]{output_file}[/bold green]"
+    )
 
 
-def _excel_to_odcs(input_file: str, output_file: str, output_format: str, validate: bool) -> None:
+def _excel_to_odcs(
+    input_file: str, output_file: str, output_format: str, validate: bool
+) -> None:
     """Convert Excel to ODCS format."""
     parser = ExcelToODCSParser()
 
@@ -219,19 +216,23 @@ def _excel_to_odcs(input_file: str, output_file: str, output_format: str, valida
             progress.update(task, description="Validating ODCS schema...")
             is_valid = parser.validate_odcs_data(odcs_data)
             if not is_valid:
-                console.print("⚠️  [bold yellow]Warning:[/bold yellow] Generated ODCS data has validation issues")
+                console.print(
+                    "⚠️  [bold yellow]Warning:[/bold yellow] Generated ODCS data has validation issues"
+                )
 
         # Write output file
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        if output_format == 'yaml':
+        if output_format == "yaml":
             YAMLConverter.dict_to_yaml(odcs_data, output_file)
         else:  # json
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(odcs_data, f, indent=2, ensure_ascii=False)
 
-    console.print(f"✅ {output_format.upper()} file generated successfully: [bold green]{output_file}[/bold green]")
+    console.print(
+        f"✅ {output_format.upper()} file generated successfully: [bold green]{output_file}[/bold green]"
+    )
 
 
 @click.command("to-excel")
@@ -239,7 +240,12 @@ def _excel_to_odcs(input_file: str, output_file: str, output_format: str, valida
 @click.argument("output_file", type=click.Path())
 @click.option("--config", "-c", type=click.Path(exists=True), help="Configuration file")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
-def odcs_to_excel(input_file: str, output_file: str, config: Optional[str] = None, verbose: bool = False) -> None:
+def odcs_to_excel(
+    input_file: str,
+    output_file: str,
+    config: Optional[str] = None,
+    verbose: bool = False,
+) -> None:
     """Convert ODCS JSON/YAML to Excel format.
 
     Creates an Excel file with separate worksheets for each top-level ODCS field.
@@ -259,8 +265,8 @@ def odcs_to_excel(input_file: str, output_file: str, config: Optional[str] = Non
 @click.option(
     "--format",
     "-f",
-    type=click.Choice(['json', 'yaml'], case_sensitive=False),
-    help="Output format (auto-detected from extension if not specified)"
+    type=click.Choice(["json", "yaml"], case_sensitive=False),
+    help="Output format (auto-detected from extension if not specified)",
 )
 @click.option("--validate", is_flag=True, help="Validate against ODCS schema")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
@@ -269,7 +275,7 @@ def excel_to_odcs(
     output_file: str,
     format: Optional[str] = None,
     validate: bool = False,
-    verbose: bool = False
+    verbose: bool = False,
 ) -> None:
     """Convert Excel file to ODCS JSON/YAML format.
 
@@ -283,8 +289,8 @@ def excel_to_odcs(
             output_format = format.lower()
         else:
             output_format = _detect_file_type(output_file)
-            if output_format not in ['json', 'yaml']:
-                output_format = 'json'  # default
+            if output_format not in ["json", "yaml"]:
+                output_format = "json"  # default
 
         _excel_to_odcs(input_file, output_file, output_format, validate)
     except Exception as e:
@@ -296,6 +302,7 @@ def excel_to_odcs(
 def version() -> None:
     """Show version information."""
     from . import __version__
+
     console.print(f"ODCS Converter version: [bold green]{__version__}[/bold green]")
 
 

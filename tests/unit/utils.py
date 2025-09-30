@@ -5,10 +5,8 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Optional
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import pytest
-
-from odcs_converter.models import ODCSDataContract, Server, SchemaObject, SchemaProperty
 
 
 class UnitTestHelper:
@@ -149,12 +147,14 @@ class ValidationHelper:
             assert contract_dict[field] is not None, f"Field {field} cannot be None"
 
         # Validate enum values
-        assert contract_dict["kind"] in ["DataContract"], (
-            f"Invalid kind: {contract_dict['kind']}"
-        )
-        assert contract_dict["status"] in ["active", "inactive", "deprecated"], (
-            f"Invalid status: {contract_dict['status']}"
-        )
+        assert contract_dict["kind"] in [
+            "DataContract"
+        ], f"Invalid kind: {contract_dict['kind']}"
+        assert contract_dict["status"] in [
+            "active",
+            "inactive",
+            "deprecated",
+        ], f"Invalid status: {contract_dict['status']}"
 
     @staticmethod
     def assert_server_valid(server_dict: Dict[str, Any]) -> None:
@@ -174,12 +174,12 @@ class ValidationHelper:
 
         # If primaryKey is True, primaryKeyPosition should be set
         if property_dict.get("primaryKey"):
-            assert "primaryKeyPosition" in property_dict, (
-                "Primary key must have position"
-            )
-            assert isinstance(property_dict["primaryKeyPosition"], int), (
-                "Primary key position must be integer"
-            )
+            assert (
+                "primaryKeyPosition" in property_dict
+            ), "Primary key must have position"
+            assert isinstance(
+                property_dict["primaryKeyPosition"], int
+            ), "Primary key position must be integer"
 
 
 class FileHelper:
