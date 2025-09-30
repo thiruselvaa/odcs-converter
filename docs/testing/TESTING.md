@@ -11,6 +11,7 @@ This comprehensive guide covers all aspects of testing in the ODCS Converter pro
 - [Test Types](#test-types)
 - [Test Utilities](#test-utilities)
 - [Best Practices](#best-practices)
+- [Code Quality](#code-quality)
 - [Continuous Integration](#continuous-integration)
 - [Troubleshooting](#troubleshooting)
 
@@ -27,7 +28,13 @@ The ODCS Converter uses **pytest** as its testing framework. The test suite is o
 - **Total Tests**: 198 passing, 2 skipped
 - **Test Coverage**: 80%+
 - **Execution Time**: ~2 seconds for full suite
+- **Lint Status**: ✅ All checks passing
 - **Last Updated**: 2025-01-26
+
+### Related Documentation
+
+- [Test Fixes Summary](./TEST_FIXES_SUMMARY.md) - History of test failure resolutions
+- [Lint Fixes Summary](./LINT_FIXES_SUMMARY.md) - Lint issue resolutions and best practices
 
 ## Test Structure
 
@@ -536,6 +543,73 @@ def test_future_feature():
     """Test for future feature."""
     pass
 ```
+
+## Code Quality
+
+The project maintains high code quality standards through automated linting and formatting tools.
+
+### Linting with Ruff
+
+Run lint checks to ensure code follows style guidelines:
+
+```bash
+# Run all lint checks
+make lint
+
+# Auto-fix issues where possible
+make format
+```
+
+**Current Status:** ✅ All lint checks passing
+
+See [Lint Fixes Summary](./LINT_FIXES_SUMMARY.md) for details on resolved issues.
+
+### Formatting with Black
+
+Black is used for consistent code formatting:
+
+```bash
+# Format all code
+make format
+
+# Check formatting without changes
+uv run black --check src/ tests/
+```
+
+### Type Checking with MyPy
+
+Type hints are checked using MyPy (note: some issues with external library stubs remain):
+
+```bash
+# Run type checking
+make type-check
+```
+
+**Note:** Type checking currently has known issues with missing type stubs for external libraries (yaml, requests, openpyxl, pandas). These are tracked separately from lint issues.
+
+### Quality Target
+
+Run all quality checks at once:
+
+```bash
+# Run lint, format, and type-check
+make quality
+```
+
+### Best Practices for Code Quality
+
+1. **Run lint before committing**: Ensure `make lint` passes
+2. **Format automatically**: Use `make format` to apply Black formatting
+3. **Fix lint issues promptly**: Address Ruff warnings as they appear
+4. **Use `__all__` for re-exports**: Explicitly declare public module interfaces
+5. **Follow type comparison rules**: Use `is`/`is not` for type comparisons
+
+### Common Lint Rules
+
+- **F401**: Unused imports - Remove or re-export with `__all__`
+- **E721**: Type comparisons - Use `is`/`is not` instead of `==`/`!=`
+- **F841**: Unused variables - Remove or prefix with underscore
+- **E501**: Line too long - Keep lines under 100 characters (Black handles this)
 
 ## Continuous Integration
 
