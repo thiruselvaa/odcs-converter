@@ -29,7 +29,26 @@ A complete, enterprise-grade Python toolkit for bidirectional conversion between
 - ⚙️ **CI/CD Pipeline**: GitHub Actions with automated testing
 - 📈 **Performance**: <30 seconds for large contracts (500+ properties)
 
+### 📊 **Advanced Logging & Monitoring**
+- 🔍 **Loguru-Powered**: Modern, flexible logging with environment-aware configuration
+- 🌍 **Multi-Environment**: Optimized configs for local, dev, test, stage, and prod environments
+- 📈 **Performance Tracking**: Automatic operation timing and correlation ID tracking
+- 🔐 **Security**: Sensitive data masking and configurable field protection
+- 📄 **Structured Logging**: JSON Lines format for log analysis and monitoring
+- 🔄 **Log Rotation**: Configurable rotation policies and retention management
+- 🎯 **Rich Console**: Beautiful, colorized console output with progress indicators
+
 ## Installation
+
+### Quick Installation with Make
+
+```bash
+# Recommended: Fast installation with uv
+make install
+
+# Complete development setup
+make quickstart
+```
 
 ### Using pip
 
@@ -159,13 +178,68 @@ Each Excel file contains separate, organized worksheets with complete ODCS v3.0.
 
 ## Development
 
-### Setup Development Environment
+### Quick Start with Make
 
 ```bash
-# Clone the repository
+# Clone and setup everything in one command
 git clone https://github.com/thiruselvaa/odcs-converter.git
 cd odcs-converter
+make quickstart  # Installs dependencies, sets up dev environment, creates directories
 
+# Or step by step
+make install     # Install with uv (fast!)
+make dev        # Setup development environment
+make test-fast  # Run quick tests
+```
+
+### Makefile Commands
+
+The project includes a comprehensive Makefile for all development tasks:
+
+```bash
+# 🧪 Testing
+make test              # Run all tests (warnings suppressed)
+make test-unit         # Unit tests only
+make test-integration  # Integration tests only
+make test-fast         # Quick tests (unit + integration)
+make test-coverage     # Generate coverage report
+make test-logging      # Test logging system
+
+# 📊 CLI Operations
+make cli-version       # Show version info
+make cli-help          # Display help
+make cli-formats       # Show supported formats
+make cli-demo          # Run CLI demonstration
+make check-warnings    # Verify no Python warnings
+
+# 📝 Logging
+make logs-demo         # Run logging demonstration
+make logs-clean        # Clean log files
+make logs-analyze      # Analyze structured logs
+
+# ✨ Code Quality
+make lint              # Run linting
+make format            # Format code
+make type-check        # Type checking
+make quality           # All quality checks
+make quality-fix       # Auto-fix issues
+
+# 🔧 Environment Setup
+make env-local         # Configure for local development
+make env-dev           # Configure for development
+make env-prod          # Configure for production
+make show-config       # Display current configuration
+
+# 🧹 Cleanup
+make clean             # Clean build artifacts
+make clean-all         # Complete cleanup
+```
+
+See [Makefile Guide](docs/MAKEFILE_GUIDE.md) for detailed documentation.
+
+### Manual Setup (Alternative)
+
+```bash
 # Using uv (recommended - ultra fast!)
 uv sync
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
@@ -179,7 +253,7 @@ pip install -e ".[dev]"
 uv run pre-commit install
 ```
 
-### Running Tests
+### Running Tests Manually
 
 ```bash
 # With uv (recommended)
