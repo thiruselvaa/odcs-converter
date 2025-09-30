@@ -1,0 +1,194 @@
+{
+  "version": "2.0.0",
+  "kind": "DataContract",
+  "apiVersion": "v3.0.2",
+  "id": "complete-test-contract",
+  "name": "Complete Test Contract",
+  "tenant": "test-tenant",
+  "status": "active",
+  "dataProduct": "Test Data Product",
+  "domain": "test_domain",
+  "contractCreatedTs": "2024-01-15T09:00:00Z",
+  "tags": ["test", "complete", "sample"],
+  "description": {
+    "usage": "Complete test contract for comprehensive testing",
+    "purpose": "Testing all ODCS fields and conversion scenarios",
+    "limitations": "Test environment only - not for production use"
+  },
+  "servers": [
+    {
+      "server": "test-db-primary",
+      "type": "postgresql",
+      "description": "Primary test database server",
+      "environment": "test",
+      "host": "test-db.example.com",
+      "port": 5432,
+      "database": "test_db",
+      "schema": "public"
+    },
+    {
+      "server": "test-warehouse",
+      "type": "snowflake",
+      "description": "Test data warehouse",
+      "environment": "test",
+      "account": "test-account",
+      "database": "TEST_DW",
+      "schema": "ANALYTICS",
+      "warehouse": "TEST_WH"
+    }
+  ],
+  "schema": [
+    {
+      "name": "test_table",
+      "logicalType": "object",
+      "physicalName": "test_table_v1",
+      "description": "Test table for validation",
+      "businessName": "Test Data Table",
+      "dataGranularityDescription": "One record per test entity",
+      "properties": [
+        {
+          "name": "id",
+          "logicalType": "integer",
+          "physicalType": "BIGINT",
+          "description": "Unique identifier",
+          "required": true,
+          "primaryKey": true,
+          "primaryKeyPosition": 1
+        },
+        {
+          "name": "name",
+          "logicalType": "string",
+          "physicalType": "VARCHAR(255)",
+          "description": "Entity name",
+          "required": true
+        },
+        {
+          "name": "created_at",
+          "logicalType": "timestamp",
+          "physicalType": "TIMESTAMP",
+          "description": "Creation timestamp",
+          "required": true
+        },
+        {
+          "name": "is_active",
+          "logicalType": "boolean",
+          "physicalType": "BOOLEAN",
+          "description": "Active status flag",
+          "required": false
+        },
+        {
+          "name": "score",
+          "logicalType": "number",
+          "physicalType": "DECIMAL(10,2)",
+          "description": "Numeric score value",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "lookup_table",
+      "logicalType": "object",
+      "physicalName": "lookup_table_v1",
+      "description": "Reference lookup table",
+      "businessName": "Reference Data",
+      "properties": [
+        {
+          "name": "code",
+          "logicalType": "string",
+          "physicalType": "VARCHAR(10)",
+          "description": "Reference code",
+          "required": true,
+          "primaryKey": true,
+          "primaryKeyPosition": 1
+        },
+        {
+          "name": "description",
+          "logicalType": "string",
+          "physicalType": "VARCHAR(500)",
+          "description": "Code description",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "support": [
+    {
+      "channel": "test-support",
+      "url": "https://support.example.com/test",
+      "description": "Test support channel",
+      "tool": "web",
+      "scope": "issues"
+    },
+    {
+      "channel": "test-docs",
+      "url": "https://docs.example.com/test",
+      "description": "Test documentation",
+      "tool": "confluence",
+      "scope": "documentation"
+    }
+  ],
+  "team": [
+    {
+      "username": "test.owner@example.com",
+      "name": "Test Owner",
+      "role": "owner",
+      "description": "Test contract owner"
+    },
+    {
+      "username": "test.consumer@example.com",
+      "name": "Test Consumer",
+      "role": "consumer",
+      "description": "Test data consumer"
+    }
+  ],
+  "roles": [
+    {
+      "role": "test_reader",
+      "description": "Read-only access to test data",
+      "access": "SELECT"
+    },
+    {
+      "role": "test_writer",
+      "description": "Write access for test processes",
+      "access": "INSERT, UPDATE, DELETE"
+    }
+  ],
+  "slaProperties": [
+    {
+      "property": "availability",
+      "value": 99.5,
+      "unit": "percent",
+      "driver": "operational"
+    },
+    {
+      "property": "freshness",
+      "value": 30,
+      "unit": "minutes",
+      "driver": "operational"
+    }
+  ],
+  "authoritativeDefinitions": [
+    {
+      "url": "https://docs.example.com/test-contract",
+      "type": "businessDefinition"
+    },
+    {
+      "url": "https://github.com/example/test-contracts",
+      "type": "technicalDefinition"
+    }
+  ],
+  "customProperties": [
+    {
+      "property": "testEnvironment",
+      "value": "integration"
+    },
+    {
+      "property": "autoCleanup",
+      "value": true
+    },
+    {
+      "property": "maxRetries",
+      "value": 3
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "version": "1.0.0",
+  "kind": "DataContract",
+  "apiVersion": "v3.0.2",
+  "id": "example-data-contract-001",
+  "name": "User Analytics Data Contract",
+  "tenant": "analytics-team",
+  "status": "active",
+  "dataProduct": "User Behavior Analytics",
+  "domain": "user_analytics",
+  "tags": ["analytics", "user-data", "behavioral", "production"],
+  "description": {
+    "usage": "This dataset provides comprehensive user behavioral analytics for product optimization and marketing insights.",
+    "purpose": "Enable data-driven decision making for product development and user experience improvements.",
+    "limitations": "Data is aggregated daily and may have up to 24-hour latency. Personal identifiable information is masked.",
+    "authoritativeDefinitions": [
+      {
+        "url": "https://wiki.company.com/analytics/user-behavior",
+        "type": "businessDefinition"
+      }
+    ]
+  },
+  "servers": [
+    {
+      "server": "analytics-warehouse",
+      "type": "snowflake",
+      "description": "Primary analytics data warehouse",
+      "environment": "production",
+      "account": "company-analytics",
+      "database": "ANALYTICS_DB",
+      "schema": "USER_BEHAVIOR",
+      "warehouse": "ANALYTICS_WH"
+    }
+  ],
+  "schema": [
+    {
+      "name": "user_sessions",
+      "logicalType": "object",
+      "physicalName": "user_sessions_fact",
+      "description": "User session data with behavioral metrics",
+      "businessName": "User Sessions",
+      "dataGranularityDescription": "One record per user session",
+      "properties": [
+        {
+          "name": "session_id",
+          "logicalType": "string",
+          "physicalType": "VARCHAR(36)",
+          "description": "Unique session identifier",
+          "required": true,
+          "primaryKey": true,
+          "primaryKeyPosition": 1,
+          "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+        },
+        {
+          "name": "user_id",
+          "logicalType": "string",
+          "physicalType": "VARCHAR(36)",
+          "description": "Anonymized user identifier",
+          "required": true,
+          "classification": "restricted",
+          "examples": ["user_abc123xyz"]
+        },
+        {
+          "name": "session_start_ts",
+          "logicalType": "date",
+          "physicalType": "TIMESTAMP_NTZ",
+          "description": "Session start timestamp in UTC",
+          "required": true,
+          "examples": ["2024-01-15T10:30:00Z"]
+        },
+        {
+          "name": "page_views",
+          "logicalType": "integer",
+          "physicalType": "INTEGER",
+          "description": "Number of pages viewed in session",
+          "required": true,
+          "examples": [5, 12, 3]
+        },
+        {
+          "name": "session_duration_minutes",
+          "logicalType": "number",
+          "physicalType": "DECIMAL(10,2)",
+          "description": "Session duration in minutes",
+          "examples": [15.5, 45.25, 2.75]
+        }
+      ],
+      "tags": ["fact-table", "behavioral"],
+      "quality": [
+        {
+          "name": "session_id_uniqueness",
+          "description": "Ensure session IDs are unique",
+          "dimension": "uniqueness",
+          "type": "library",
+          "rule": "duplicateCount",
+          "mustBe": 0,
+          "severity": "error"
+        }
+      ]
+    }
+  ],
+  "support": [
+    {
+      "channel": "analytics-support",
+      "url": "mailto:analytics-team@company.com",
+      "description": "Primary support channel for analytics data questions",
+      "tool": "email",
+      "scope": "issues"
+    },
+    {
+      "channel": "analytics-slack",
+      "url": "https://company.slack.com/channels/analytics",
+      "description": "Real-time support and announcements",
+      "tool": "slack",
+      "scope": "interactive"
+    }
+  ],
+  "team": [
+    {
+      "username": "jane.smith@company.com",
+      "name": "Jane Smith",
+      "role": "Data Product Owner",
+      "description": "Responsible for data product strategy and roadmap"
+    },
+    {
+      "username": "john.doe@company.com",
+      "name": "John Doe",
+      "role": "Senior Data Engineer",
+      "description": "Technical lead for data pipeline development"
+    }
+  ],
+  "roles": [
+    {
+      "role": "analytics_reader",
+      "description": "Read-only access to analytics data",
+      "access": "SELECT",
+      "firstLevelApprovers": "jane.smith@company.com"
+    },
+    {
+      "role": "analytics_writer",
+      "description": "Read and write access to analytics data",
+      "access": "SELECT, INSERT, UPDATE",
+      "firstLevelApprovers": "jane.smith@company.com",
+      "secondLevelApprovers": "data-governance@company.com"
+    }
+  ],
+  "slaProperties": [
+    {
+      "property": "availability",
+      "value": 99.9,
+      "unit": "percent",
+      "element": "user_sessions",
+      "driver": "operational"
+    },
+    {
+      "property": "freshness",
+      "value": 24,
+      "unit": "hours",
+      "element": "user_sessions",
+      "driver": "operational"
+    }
+  ],
+  "authoritativeDefinitions": [
+    {
+      "url": "https://wiki.company.com/data/user-analytics",
+      "type": "businessDefinition"
+    },
+    {
+      "url": "https://github.com/company/analytics-pipelines",
+      "type": "implementation"
+    }
+  ],
+  "customProperties": [
+    {
+      "property": "dataRetentionDays",
+      "value": 2555
+    },
+    {
+      "property": "complianceClassification",
+      "value": "internal"
+    }
+  ],
+  "contractCreatedTs": "2024-01-15T09:00:00Z"
+}

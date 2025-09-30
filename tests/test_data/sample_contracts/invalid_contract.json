@@ -1,0 +1,56 @@
+{
+  "version": "1.0.0",
+  "kind": "InvalidContract",
+  "apiVersion": "v2.0.0",
+  "status": "unknown",
+  "invalidField": "this should not be here",
+  "servers": [
+    {
+      "server": "invalid-server",
+      "type": "unknown_database_type",
+      "port": "not_a_number",
+      "host": ""
+    }
+  ],
+  "schema": [
+    {
+      "name": "",
+      "logicalType": "invalid_type",
+      "properties": [
+        {
+          "name": "",
+          "logicalType": "unknown",
+          "required": "not_a_boolean"
+        }
+      ]
+    }
+  ],
+  "support": [
+    {
+      "channel": "",
+      "url": "not-a-valid-url",
+      "tool": 123
+    }
+  ],
+  "team": [
+    {
+      "username": "",
+      "role": "",
+      "dateIn": "invalid-date-format"
+    }
+  ],
+  "customProperties": [
+    {
+      "property": "",
+      "value": null
+    },
+    {
+      "property": "duplicate",
+      "value": "value1"
+    },
+    {
+      "property": "duplicate",
+      "value": "value2"
+    }
+  ]
+}
