@@ -17,9 +17,11 @@ For now, see the [Main README](../README.md) for quick start and basic usage.
 ### 👨‍💻 Development Documentation
 Documentation for developers working on the project.
 
+- **[Development README](development/README.md)** - Developer documentation index
 - **[Setup Guide](development/SETUP.md)** - Environment setup and installation instructions
 - **[Contributing Guide](development/CONTRIBUTING.md)** - How to contribute to the project
 - **[Project Structure](development/PROJECT_STRUCTURE.md)** - Codebase organization
+- **[ODCS Schema Coverage](development/ODCS_SCHEMA_COVERAGE.md)** - Comprehensive ODCS v3.0.2 implementation analysis
 - **[Architecture Overview](development/ARCHITECTURE.md)** - System design *(coming soon)*
 - **[API Reference](development/API.md)** - Detailed API documentation *(coming soon)*
 
@@ -58,7 +60,8 @@ Project organization, changes, and historical documentation.
 1. Read the [Setup Guide](development/SETUP.md)
 2. Check the [Contributing Guide](development/CONTRIBUTING.md)
 3. Review the [Project Structure](development/PROJECT_STRUCTURE.md)
-4. Run tests using the [Testing Guide](testing/TESTING.md)
+4. Review [ODCS Schema Coverage](development/ODCS_SCHEMA_COVERAGE.md)
+5. Run tests using the [Testing Guide](testing/TESTING.md)
 
 ### For Maintainers
 1. Review [Test Fixes Summary](testing/TEST_FIXES_SUMMARY.md)
