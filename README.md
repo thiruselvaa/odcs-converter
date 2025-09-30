@@ -102,12 +102,58 @@ odcs-converter to-odcs data.xlsx contract.yaml --format yaml --validate
 # 🧪 Preview operations without execution
 odcs-converter convert contract.json output.xlsx --dry-run
 
+# 📋 Excel Template Generation (NEW!)
+# Generate pre-formatted Excel templates with color-coded fields
+odcs-converter generate-template minimal.xlsx --type minimal      # Essential fields only
+odcs-converter generate-template required.xlsx --type required    # All required fields
+odcs-converter generate-template full.xlsx --type full           # Complete coverage
+odcs-converter generate-template clean.xlsx --no-examples        # Without example data
+
 # 📋 Rich information commands
 odcs-converter version --verbose        # Detailed version with system info
 odcs-converter formats                  # Beautiful table of supported formats
 odcs-converter help                     # Comprehensive help with examples
 odcs-converter --help                   # Quick command reference
 ```
+
+### 🆕 Excel Template Generation
+
+Create pre-formatted Excel templates with built-in guidance to streamline data contract creation:
+
+**Features:**
+- 🔴 **RED headers** = Required fields (must be filled)
+- 🔵 **BLUE headers** = Optional fields (can be left empty)
+- 📖 Built-in **Instructions** sheet with comprehensive guidance
+- 💬 Cell comments with field descriptions and format requirements
+- 📝 Example values showing proper data formats
+- 🎯 Three template types for different use cases
+
+**Template Types:**
+
+| Type | Worksheets | Fields | Best For |
+|------|-----------|--------|----------|
+| `minimal` | 3 | ~10 | Learning, quick prototypes |
+| `required` | 4 | ~20 | Production contracts, standard use |
+| `full` | 16 | ~100 | Enterprise, complex requirements |
+
+**Workflow:**
+```bash
+# 1. Generate a template
+odcs-converter generate-template my-contract.xlsx --type required
+
+# 2. Open in Excel/Google Sheets and fill in your data
+#    - Focus on RED headers (required fields)
+#    - Optionally fill BLUE headers for additional details
+#    - Delete example rows when done
+
+# 3. Convert to ODCS format
+odcs-converter excel-to-odcs my-contract.xlsx -o contract.json
+
+# 4. Validate the output
+odcs-converter to-excel contract.json validated.xlsx
+```
+
+See [Template Generation Documentation](docs/templates/TEMPLATE_GENERATION.md) for complete details.
 
 ### CLI Features
 
